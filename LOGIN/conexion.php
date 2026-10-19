@@ -6,7 +6,6 @@ $database = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'railway';
 $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
 
 try {
-    // La variable se llama $pdo
     $pdo = new PDO(
         "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",
         $user,
