@@ -3,10 +3,8 @@ FROM php:8.2-apache
 # Copiar los archivos del proyecto al directorio web de Apache
 COPY . /var/www/html/
 
-# Configurar permisos
+# Configurar permisos para Apache
 RUN chown -R www-data:www-data /var/www/html
 
-# Modificar el puerto en los archivos de configuración de Apache usando un valor por defecto si PORT está vacío
-RUN sed -i "s/80/\${PORT:-10000}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
-
-EXPOSE 10000
+# Exponer el puerto estándar 80 del contenedor web
+EXPOSE 80
