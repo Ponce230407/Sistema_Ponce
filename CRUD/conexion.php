@@ -9,19 +9,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-try {
-    $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",
-        $user,
-        $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-    
-    // Asignamos $conexion a $pdo para que los archivos del CRUD que usan $conexion funcionen sin modificar su código
-    $conexion = $pdo;
+$conexion = new mysqli($host, $user, $password, $database, (int)$port);
 
-} catch (PDOException $error) {
-    echo "<h3 style='color:red;'>Error de conexión:</h3>";
-    echo "<pre>" . htmlspecialchars($error->getMessage()) . "</pre>";
-    exit;
+if ($conexion->connect_error) {
+    die("Conexión fallida: " . $conexion->connect_error);
 }
+
+$conexion->set_charset("utf8mb4");
