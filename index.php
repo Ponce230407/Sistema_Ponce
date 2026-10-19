@@ -1,5 +1,4 @@
 <?php
-// Redirige directamente al catálogo de productos
-header("Location: CRUD/productos.php");
+header("Location: /Foto/public/index.html");
 exit();
 ?>
