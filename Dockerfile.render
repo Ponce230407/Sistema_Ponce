@@ -1,8 +1,15 @@
-FROM php:8.3-apache
+FROM php:8.2-apache
 
-RUN docker-php-ext-install mysqli pdo_mysql && a2enmod rewrite
+# Habilitar mod_rewrite si lo necesitas para URLs amigables
+RUN a2enmod rewrite
 
+# Copiar los archivos del proyecto al directorio web de Apache
 COPY . /var/www/html/
-COPY render-entrypoint.sh /usr/local/bin/render-entrypoint
 
-CMD ["sh", "/usr/local/bin/render-entrypoint"]
+# Configurar permisos si es necesario
+RUN chown -R www-data:www-data /var/www/html
+
+# Configurar Apache para que escuche en el puerto que Render asigna dinámicamente ($PORT)
+RUN sed -i "s/80/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
+
+EXPOSE ${PORT}
