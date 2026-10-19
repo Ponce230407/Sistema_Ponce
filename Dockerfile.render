@@ -1,0 +1,8 @@
+FROM php:8.3-apache
+
+RUN docker-php-ext-install mysqli pdo_mysql && a2enmod rewrite
+
+COPY . /var/www/html/
+COPY render-entrypoint.sh /usr/local/bin/render-entrypoint
+
+CMD ["sh", "/usr/local/bin/render-entrypoint"]
