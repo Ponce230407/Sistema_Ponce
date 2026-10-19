@@ -1,5 +1,8 @@
 FROM php:8.2-apache
 
+# Instalar y habilitar la extensión mysqli para conectar con MySQL/MariaDB
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+
 # Copiar los archivos del proyecto al directorio web de Apache
 COPY . /var/www/html/
 
