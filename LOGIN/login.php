@@ -1,4 +1,8 @@
 <?php
+include 'conexion.php'; // Al incluirlo, la variable $pdo ya estará lista para usarse aquí
+
+// Resto de tu código de login o registro...
+?>
 require 'conexion.php';
 
 $error = '';
