@@ -1,5 +1,4 @@
 <?php
-// Render usa DB_*; MYSQL* se conserva para proveedores y entornos locales existentes.
 $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
@@ -13,10 +12,13 @@ try {
         $password,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+    // Si se conecta con éxito, imprimirá esto temporalmente:
+    echo "¡Conexión exitosa a la base de datos!";
 } catch (PDOException $error) {
-    error_log('No se pudo conectar con la base de datos: ' . $error->getMessage());
-    http_response_code(500);
-    exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_*.');
+    // Esto mostrará el error exacto que está devolviendo Railway
+    echo "<h3 style='color:red;'>Error exacto de PDO:</h3>";
+    echo "<pre>" . htmlspecialchars($error->getMessage()) . "</pre>";
+    exit;
 }
 
 if (session_status() === PHP_SESSION_NONE) {
