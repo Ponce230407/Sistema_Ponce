@@ -5,6 +5,10 @@ $password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 $database = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'railway';
 $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 try {
     $pdo = new PDO(
         "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",
@@ -12,15 +16,12 @@ try {
         $password,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    // Si se conecta con éxito, imprimirá esto temporalmente:
-    echo "¡Conexión exitosa a la base de datos!";
+    
+    // Asignamos $conexion a $pdo para que los archivos del CRUD que usan $conexion funcionen sin modificar su código
+    $conexion = $pdo;
+
 } catch (PDOException $error) {
-    // Esto mostrará el error exacto que está devolviendo Railway
-    echo "<h3 style='color:red;'>Error exacto de PDO:</h3>";
+    echo "<h3 style='color:red;'>Error de conexión:</h3>";
     echo "<pre>" . htmlspecialchars($error->getMessage()) . "</pre>";
     exit;
-}
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
