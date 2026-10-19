@@ -1,28 +1,30 @@
 <?php
-$host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
-$user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
-$password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
-$database = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'railway';
-$port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+require 'conexion.php';
 
-try {
-    $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",
-        $user,
-        $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-} catch (PDOException $error) {
-    error_log('No se pudo conectar con la base de datos: ' . $error->getMessage());
-    http_response_code(500);
-    exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_*.');
-}
+$error = ''; // <--- Inicializamos la variable aquí para evitar el Warning
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $correo = trim($_POST['correo'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    $stmt = $pdo->prepare('SELECT id, nombre, password_hash FROM usuarios WHERE correo = ?');
+    $stmt->execute([$correo]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($usuario && password_verify($password, $usuario['password_hash'])) {
+        session_regenerate_id(true);
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['nombre'] = $usuario['nombre'];
+        
+        if (isset($_COOKIE['visitante_id'])) {
+            $pdo->prepare('UPDATE eventos SET usuario_id = ? WHERE visitante_id = ? AND usuario_id IS NULL')
+                ->execute([$usuario['id'], $_COOKIE['visitante_id']]);
+        }
+        
+        header('Location: ../Seguir/bienvenida.php');
+        exit;
+    }
+    
+    $error = 'Correo o contraseña incorrectos.';
 }
-
-function e($texto)
-{
-    return htmlspecialchars($texto, ENT_QUOTES, 'UTF-8');
-}
+?>
