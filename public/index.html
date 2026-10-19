@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitio Web Personal - Itzel</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; }
+    .profile-card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .profile-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #3498db; margin-bottom: 15px; }
+    h2 { color: #2c3e50; margin-bottom: 10px; }
+    .btn { display: inline-block; background-color: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px; }
+    .btn:hover { background-color: #2980b9; }
+  </style>
+</head>
+<body>
 
+  <div style="max-width: 600px; margin: 0 auto;">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <div class="profile-card">
+    <img src="foto.jpg" alt="Fotografía de Itzel" class="profile-img">
+    <h2>Itzel</h2>
+    <p><strong>Carrera:</strong> Licenciatura en Información e Innovación Digital</p>
+    <p style="margin-top: 10px;">Bienvenido a mi sitio web. Ayúdame respondiendo una breve encuesta sobre la UPVM.</p>
+    <a href="encuesta.html" class="btn">Ir a la Encuesta</a>
+  </div>
+
+  <script>
+    fetch('nav.html')
+      .then(res => res.text())
+      .then(data => document.getElementById('nav-placeholder').innerHTML = data);
+  </script>
+</body>
+</html>
