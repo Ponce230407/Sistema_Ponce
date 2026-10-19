@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encuesta UPVM - Itzel</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Inserción de Menú -->
+    <div id="nav-placeholder"></div>
+
+    <header class="header-profile">
+      <img src="foto.jpg" alt="Fotografía de Itzel" class="profile-img">
+      <h1 class="title">Encuesta UPVM: La Cruda Realidad 🎓</h1>
+    </header>
+
+    <form action="procesar_encuesta.php" method="POST">
+
+      <div class="form-group">
+        <label for="nombre_completo">Nombre completo</label>
+        <input id="nombre_completo" name="nombre_completo" type="text" autocomplete="name" maxlength="150" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="p1">1. ¿Qué frase describe mejor a tus profesores esta semana?</label>
+        <select id="p1" name="p1_profesores" required>
+          <option value="">-- Selecciona una opción --</option>
+          <option value="Explican súper bien">Explican súper bien y dan paz mental</option>
+          <option value="Asumen sabiduría">"Esto ya lo debieron ver en el kínder"</option>
+          <option value="Exceso de tareas">Creen que su materia es la única que cursamos</option>
+          <option value="Impuntuales">Llegan 20 minutos tarde pero exigen puntualidad</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="p2">2. Sinceridad ante todo: ¿Qué tipo de compañero de equipo eres?</label>
+        <select id="p2" name="p2_alumnos" required>
+          <option value="">-- Selecciona una opción --</option>
+          <option value="El acarreador">El acarreador del equipo (estrés al 100%)</option>
+          <option value="El despistado">El que pregunta "¿qué hay que hacer?" 10 minutos antes</option>
+          <option value="El diseñador">El diseñador de diapositivas y animaciones</option>
+          <option value="El fantasma">Pone para los refrescos pero no aparece en el grupo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="p3">3. ¿Cuál es el mayor misterio sin resolver de la UPVM?</label>
+        <select id="p3" name="p3_instalaciones" required>
+          <option value="">-- Selecciona una opción --</option>
+          <option value="El Wi-Fi">El Wi-Fi que solo agarra si te paras en un pie</option>
+          <option value="Los contactos">Los contactos donde ningún cargador embona bien</option>
+          <option value="Los baños">Saber a qué hora habrá papel en los baños</option>
+          <option value="Las bancas">Bancas congeladas en la mañana y ardiendo a mediodía</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="p4">4. ¿Cómo te preparas mentalmente para un examen parcial?</label>
+        <select id="p4" name="p4_examenes" required>
+          <option value="">-- Selecciona una opción --</option>
+          <option value="Estudio previo">Estudio con días de anticipación</option>
+          <option value="Café y velocidad 2x">Un café concentrado y tutoriales en velocidad 2x</option>
+          <option value="A la suerte">Aporto mi fe en el "Dios proveerá" y respondo al azar</option>
+          <option value="Aceptar destino">Miro la tabla de equivalencias a ver si aún paso con 7.0</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="p5">5. ¿Cuál es la verdadera fuente de energía del estudiante UPVM?</label>
+        <select id="p5" name="p5_comida" required>
+          <option value="">-- Selecciona una opción --</option>
+          <option value="Ganas de triunfar">El deseo genuino de graduarme y triunfar</option>
+          <option value="Tacos y maruchan">Los tacos de afuera y una maruchan</option>
+          <option value="Bebidas energéticas">Bebidas con cafeína pura fluyendo por mis venas</option>
+          <option value="Risas con amigos">Las risas con los amigos entre clase y clase</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-submit">Enviar Respuestas y Reclamar Regalo 🎁</button>
+    </form>
+
+  </div>
+
+  <script>
+    fetch('nav.html')
+      .then(res => res.text())
+      .then(data => document.getElementById('nav-placeholder').innerHTML = data);
+  </script>
+  <script src="/Seguir/tracker.js"></script>
+</body>
+</html>
