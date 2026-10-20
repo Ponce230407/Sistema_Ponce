@@ -1,10 +1,1 @@
-RewriteEngine On
-
-# Alias para que funcionen URLs en minúsculas
-RewriteRule ^login/?$ LOGIN/login.php [L,QSA]
-RewriteRule ^login/(.*)$ LOGIN/$1 [L,QSA]
-RewriteRule ^seguimiento/?$ Seguir/index.php [L,QSA]
-RewriteRule ^seguimiento/(.*)$ Seguir/$1 [L,QSA]
-
-# Evita acceso directo a archivos sin extension si existe index.php
-DirectoryIndex index.php
+# Estado restaurado: sin reglas de reescritura.
