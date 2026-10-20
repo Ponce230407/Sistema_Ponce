@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubicación - Sitio Web Personal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; }
+    section { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px; }
+    .profile-photo { display: block; width: 112px; height: 112px; margin: 0 auto 20px; border: 4px solid #3498db; border-radius: 50%; object-fit: cover; }
+    h2 { color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+    iframe, #mapa-js { width: 100%; height: 400px; border: 0; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <div id="nav-placeholder"></div>
+  <img src="public/foto.jpg" alt="Fotografía de Itzel" class="profile-photo">
+
+  <section id="ubicacion-iframe">
+    <h2>Ubicación (Mapa Iframe)</h2>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d15033.706278883294!2d-99.15668624999998!3d19.609052799999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2smx!4v1790219729931!5m2!1ses!2smx" allowfullscreen="" loading="lazy"></iframe>
+  </section>
+
+  <section id="ubicacion-js">
+    <h2>Ubicación Interactiva (Maps JavaScript API)</h2>
+    <div id="mapa-js"></div>
+  </section>
+
+  <script>
+    fetch('public/nav.html')
+      .then(res => res.text())
+      .then(data => document.getElementById('nav-placeholder').innerHTML = data);
+
+    function initMap() {
+      const ubicacion = { lat: 19.609053, lng: -99.156686 };
+      const mapa = new google.maps.Map(document.getElementById("mapa-js"), { zoom: 15, center: ubicacion });
+      new google.maps.Marker({ position: ubicacion, map: mapa, title: "Ubicación Seleccionada" });
+    }
+
+    fetch('/Foto/maps-config.php')
+      .then(respuesta => {
+        if (!respuesta.ok) throw new Error('No se pudo cargar la configuración del mapa.');
+        return respuesta.json();
+      })
+      .then(configuracion => {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(configuracion.apiKey)}&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => {
+          document.getElementById('mapa-js').textContent = 'No se pudo cargar Google Maps.';
+        };
+        document.head.appendChild(script);
+      })
+      .catch(() => {
+        document.getElementById('mapa-js').textContent = 'El mapa no está configurado. Contacta al administrador del sitio.';
+      });
+  </script>
+  <script src="/Seguir/tracker.js"></script>
+</body>
+</html>
