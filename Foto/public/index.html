@@ -3,52 +3,364 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sitio Web Personal - Itzel</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Encuesta UPVM</title>
+  <style>
+    :root {
+      --bg-sky-1: #b7c7f8;
+      --bg-sky-2: #a7b9eb;
+      --panel-bg: rgba(255, 255, 255, 0.78);
+      --card-light: #f3f3f3;
+      --text: #1f2b3d;
+      --muted: #44516a;
+      --primary: #dfe9f7;
+      --primary-dark: #c7d6ef;
+      --shadow: rgba(30, 41, 59, 0.18);
+      --button: rgba(215, 224, 238, 0.95);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, var(--bg-sky-1), var(--bg-sky-2));
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 18px 50px;
+    }
+
+    .page-shell {
+      width: min(780px, 100%);
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      box-shadow: 0 20px 35px rgba(26, 39, 63, 0.12);
+      overflow: hidden;
+    }
+
+    .browser-window {
+      background: #f1f1f1;
+      border-radius: 18px 18px 0 0;
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px 8px;
+      background: rgba(255, 255, 255, 0.55);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .browser-left,
+    .browser-right,
+    .nav-icons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn,
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .nav-btn {
+      background: #d6d6d6;
+      position: relative;
+    }
+
+    .nav-btn.arrow {
+      width: 9px;
+      height: 9px;
+      border: solid #6e6e6e;
+      border-width: 0 2px 2px 0;
+      border-radius: 0;
+      transform: rotate(135deg);
+      background: transparent;
+    }
+
+    .dot.red { background: #f46d5f; }
+    .dot.yellow { background: #f0c14f; }
+    .dot.green { background: #5bc96d; }
+
+    .browser-title {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      color: #4e5f73;
+      gap: 6px;
+      padding: 0 12px;
+    }
+
+    .address-bar {
+      width: min(580px, 90%);
+      background: #f8f8f8;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px;
+      font-size: 12px;
+      color: #5a6477;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .browser-right {
+      font-size: 14px;
+      color: #697489;
+    }
+
+    .page-panel {
+      background: rgba(238, 239, 242, 0.92);
+      padding: 26px 20px 20px;
+      border-radius: 0 0 18px 18px;
+    }
+
+    .profile-card {
+      max-width: 650px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 16px;
+      text-align: center;
+      padding: 14px 20px 18px;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 18px rgba(62, 73, 96, 0.12);
+      display: block;
+      margin: 0 auto 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: #1f2b3d;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      font-size: 1.05rem;
+      color: #2b3a52;
+      font-weight: 500;
+    }
+
+    .welcome-panel {
+      max-width: 650px;
+      margin: 28px auto 0;
+      background: rgba(245, 246, 247, 0.9);
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+      padding: 18px 18px 20px;
+      text-align: left;
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .welcome-title {
+      margin: 0;
+      font-size: clamp(1.2rem, 2vw, 2rem);
+      font-weight: 700;
+      color: #1f2b3d;
+    }
+
+    .mini-icon {
+      font-size: 20px;
+      opacity: 0.8;
+    }
+
+    .welcome-text {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: #2b3a52;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 180px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: var(--button);
+      color: #23314d;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: inset 0 0 0 1px rgba(80, 97, 125, 0.14);
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #d2ddeb;
+    }
+
+    .btn-primary {
+      background: #dfe9f5;
+    }
+
+    .btn-secondary {
+      background: #dde5f5;
+    }
+
+    .video-section {
+      max-width: 650px;
+      margin: 22px auto 0;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 14px 14px 10px;
+    }
+
+    .video-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #1f2b3d;
+    }
+
+    .video-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.36);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .video-head h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .video-frame {
+      background: rgba(255,255,255,0.22);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 260px;
+      background: #111827;
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 18px 12px 28px; }
+      .page-panel { padding: 18px 12px 14px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; }
+      .address-bar { font-size: 11px; }
+    }
+  </style>
 </head>
 <body>
   <main class="page-shell">
-    <div id="nav-placeholder"></div>
+    <div class="browser-window">
+      <div class="browser-bar">
+        <div class="browser-left">
+          <span class="nav-btn arrow" aria-hidden="true"></span>
+          <span class="nav-btn" aria-hidden="true"></span>
+          <span class="nav-btn" aria-hidden="true"></span>
+        </div>
 
-    <section class="hero-card">
-      <div class="profile-top">
-        <img src="foto.jpg" alt="Fotografía de Itzel" class="profile-img">
+        <div class="browser-title">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+
+        <div class="browser-right">
+          <span>✦</span>
+        </div>
       </div>
 
-      <div class="hero-copy">
-        <p class="eyebrow">Bienvenidos</p>
-        <h1>Itzel</h1>
-        <p class="career"><strong>Carrera:</strong> Licenciatura en Información e Innovación Digital</p>
-        <p class="description">
-          Bienvenido a mi sitio web. Ayúdame respondiendo una breve encuesta sobre la UPVM y conoce más sobre mi proyecto.
+      <div class="browser-bar" style="padding-top: 8px; padding-bottom: 12px;">
+        <div class="address-bar">encuesta-upvm-rc3.onrender.com/index.php</div>
+      </div>
+    </div>
+
+    <div class="page-panel">
+      <div class="profile-card">
+        <img src="foto.jpg" alt="Fotografía de Itzel" class="avatar">
+        <h1>Encuesta UPVM</h1>
+        <p class="subtitle">Perla Nava</p>
+      </div>
+
+      <div class="welcome-panel">
+        <div class="welcome-header">
+          <h2 class="welcome-title">Bienvenido</h2>
+          <span class="mini-icon">✎</span>
+        </div>
+
+        <p class="welcome-text">
+          Ayúdanos a mejorar la Universidad Politécnica del Valle de México contestando 5 preguntas.
         </p>
+
+        <div class="actions">
+          <a href="encuesta.html" class="btn btn-primary">Contestar encuesta</a>
+          <a href="#video" class="btn btn-secondary">Ver mi video</a>
+        </div>
       </div>
 
-      <div class="actions">
-        <a href="encuesta.html" class="btn btn-primary">Ir a la encuesta</a>
-        <a href="#video" class="btn btn-secondary">Ver video</a>
-      </div>
-    </section>
+      <div id="video" class="video-section">
+        <div class="video-head">
+          <span class="video-badge">Video</span>
+          <h2>Conoce más</h2>
+        </div>
 
-    <section id="video" class="video-section">
-      <div class="video-header">
-        <span class="video-badge">Video</span>
-        <h2>Conoce más</h2>
+        <div class="video-frame">
+          <video controls preload="metadata" playsinline>
+            <source src="../../Video.mp4" type="video/mp4">
+            Tu navegador no soporta la reproducción de video.
+          </video>
+        </div>
       </div>
-      <div class="video-frame">
-        <video controls preload="metadata" playsinline>
-          <source src="../../Video.mp4" type="video/mp4">
-          Tu navegador no soporta la reproducción de video.
-        </video>
-      </div>
-    </section>
+    </div>
   </main>
 
-  <script>
-    fetch('nav.html')
-      .then(res => res.text())
-      .then(data => document.getElementById('nav-placeholder').innerHTML = data);
-  </script>
   <script src="/Seguir/tracker.js"></script>
 </body>
 </html>
