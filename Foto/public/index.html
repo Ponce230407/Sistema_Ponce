@@ -126,6 +126,46 @@
       color: #697489;
     }
 
+    .top-nav {
+      background: rgba(18, 30, 45, 0.9);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .nav-brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #e5eefc;
+      text-decoration: none;
+      font-size: 0.92rem;
+      padding: 7px 10px;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
     .page-panel {
       background: rgba(238, 239, 242, 0.92);
       padding: 26px 20px 20px;
@@ -293,6 +333,8 @@
       .actions { flex-direction: column; }
       .btn { width: 100%; }
       .address-bar { font-size: 11px; }
+      .top-nav { flex-direction: column; align-items: flex-start; }
+      .nav-menu { width: 100%; }
     }
   </style>
 </head>
@@ -321,6 +363,17 @@
         <div class="address-bar">encuesta-upvm-rc3.onrender.com/index.php</div>
       </div>
     </div>
+
+    <nav class="top-nav" aria-label="Navegación principal">
+      <a href="/Foto/public/index.html" class="nav-brand">App Web</a>
+      <div class="nav-menu">
+        <a href="/Foto/public/index.html" class="nav-link">Inicio</a>
+        <a href="/ubicacion.html" class="nav-link">Ubicación</a>
+        <a href="/Foto/public/encuesta.html" class="nav-link">Encuesta</a>
+        <a href="/CRUD/productos.php" class="nav-link">CRUD</a>
+        <a href="/LOGIN/login.php" class="nav-link">Iniciar sesión</a>
+      </div>
+    </nav>
 
     <div class="page-panel">
       <div class="profile-card">
