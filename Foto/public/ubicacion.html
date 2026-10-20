@@ -16,7 +16,7 @@
 <body>
 
   <div id="nav-placeholder"></div>
-  <img src="public/foto.jpg" alt="Fotografía de Itzel" class="profile-photo">
+  <img src="foto.jpg" alt="Fotografía de Itzel" class="profile-photo">
 
   <section id="ubicacion-iframe">
     <h2>Ubicación (Mapa Iframe)</h2>
@@ -25,36 +25,50 @@
 
   <section id="ubicacion-js">
     <h2>Ubicación Interactiva (Maps JavaScript API)</h2>
-    <div id="mapa-js"></div>
+    <div id="mapa-js">Cargando mapa...</div>
   </section>
 
   <script>
-    fetch('public/nav.html')
+    // Cargar la barra de navegación
+    fetch('nav.html')
       .then(res => res.text())
-      .then(data => document.getElementById('nav-placeholder').innerHTML = data);
+      .then(data => document.getElementById('nav-placeholder').innerHTML = data)
+      .catch(() => console.error('No se pudo cargar la navegación.'));
 
+    // Función de inicialización para Google Maps
     function initMap() {
       const ubicacion = { lat: 19.609053, lng: -99.156686 };
-      const mapa = new google.maps.Map(document.getElementById("mapa-js"), { zoom: 15, center: ubicacion });
-      new google.maps.Marker({ position: ubicacion, map: mapa, title: "Ubicación Seleccionada" });
+      const mapa = new google.maps.Map(document.getElementById("mapa-js"), { 
+        zoom: 15, 
+        center: ubicacion 
+      });
+      new google.maps.Marker({ 
+        position: ubicacion, 
+        map: mapa, 
+        title: "Ubicación Seleccionada" 
+      });
     }
 
-    fetch('/Foto/maps-config.php')
+    // Petición al archivo PHP para obtener la API Key de forma segura
+    fetch('maps-config.php')
       .then(respuesta => {
         if (!respuesta.ok) throw new Error('No se pudo cargar la configuración del mapa.');
         return respuesta.json();
       })
       .then(configuracion => {
+        if (!configuracion.apiKey) throw new Error('API Key vacía.');
+        
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(configuracion.apiKey)}&callback=initMap`;
         script.async = true;
         script.defer = true;
         script.onerror = () => {
-          document.getElementById('mapa-js').textContent = 'No se pudo cargar Google Maps.';
+          document.getElementById('mapa-js').textContent = 'No se pudo cargar el script de Google Maps.';
         };
         document.head.appendChild(script);
       })
-      .catch(() => {
+      .catch(error => {
+        console.error(error);
         document.getElementById('mapa-js').textContent = 'El mapa no está configurado. Contacta al administrador del sitio.';
       });
   </script>
