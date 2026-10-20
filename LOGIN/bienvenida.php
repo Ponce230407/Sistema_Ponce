@@ -2,7 +2,7 @@
 require 'conexion.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
+    header('Location: ../LOGIN/login.php');
     exit;
 }
 
@@ -20,22 +20,18 @@ $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
     <main class="tarjeta">
+        <?php include 'menu.php'; ?>
         <h1>¡Hola, <?= e($usuario['nombre']) ?>!</h1>
         <p>Iniciaste sesión correctamente.</p>
-        <p><a class="boton" href="../Seguir/bienvenida.php">Ir a seguimiento y cursos</a></p>
         <ul>
             <li><strong>Correo:</strong> <?= e($usuario['correo']) ?></li>
             <li><strong>Sexo:</strong> <?= e($usuario['sexo']) ?></li>
             <li><strong>Edad:</strong> <?= e($usuario['edad']) ?></li>
             <li><strong>Carrera:</strong> <?= e($usuario['carrera']) ?></li>
         </ul>
-        <a class="boton" href="logout.php">Cerrar sesión</a>
-        <nav class="enlaces-app" aria-label="Otras secciones">
-            <a href="/Foto/public/index.html">Inicio</a>
-            <a href="/CRUD/productos.php">Productos</a>
-            <a href="/Seguir/dashboard.php">Métricas</a>
-        </nav>
+        <a class="boton" href="cursos.php" data-track="Ver catálogo (botón azul)">Ver catálogo de cursos</a>
+        <p><a href="logout.php">Cerrar sesión</a></p>
     </main>
-    <script src="/Seguir/tracker.js"></script>
+    <script src="tracker.js"></script>
 </body>
 </html>
