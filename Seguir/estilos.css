@@ -1,3 +1,53 @@
-/* Diseño compartido del área de usuarios y administración */
-:root{--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--paper:#fff;--green:#365b45;--green-dark:#244331;--orange:#ef9c55;--line:#e9e3d9;--soft:#f4eee4;--shadow:0 12px 36px #26382c12}
-*{box-sizing:border-box}body.pagina-app{margin:0;min-height:100vh;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}.app-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px max(24px,calc((100% - 1120px)/2));background:#fff;border-bottom:1px solid var(--line)}.marca{color:var(--green-dark);font-weight:800;text-decoration:none;font-size:1.08rem}.menu{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.menu a{padding:9px 13px;border-radius:999px;color:var(--green-dark);text-decoration:none;font-size:.92rem;font-weight:650}.menu a:hover,.menu a[aria-current=page]{background:var(--soft)}.contenedor{width:min(1120px,calc(100% - 36px));margin:42px auto 72px}.encabezado-pagina{max-width:720px;margin-bottom:26px}.ceja{margin:0 0 6px;color:#a9602b;text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:800}.encabezado-pagina h1{margin:0;color:var(--green-dark);font-size:clamp(2rem,4vw,2.7rem);line-height:1.15}.encabezado-pagina>p:last-child{color:var(--muted);max-width:650px}.panel{padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:var(--shadow)}.panel h2{margin:0 0 10px;color:var(--green-dark);font-size:1.18rem}.panel p{color:var(--muted)}.grid-actividades{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:18px}.actividad{display:flex;flex-direction:column}.icono-pata{font-size:1.7rem}.actividad h2{margin-top:12px}.actividad>p{flex:1}.form-inscripcion label{display:block;color:var(--ink);font-weight:650;font-size:.9rem}.form-inscripcion input{display:block;width:100%;margin:7px 0 12px;padding:11px 12px;border:1px solid #d5d9d3;border-radius:10px;font:inherit;color:var(--ink)}button,.boton{display:inline-flex;justify-content:center;align-items:center;width:100%;padding:11px 16px;border:0;border-radius:10px;background:var(--green);color:white;text-align:center;text-decoration:none;font:inherit;font-weight:700;cursor:pointer}.boton:hover,button:hover{background:var(--green-dark)}.boton-secundario{width:auto;background:#fff;color:var(--green-dark);border:1px solid var(--line)}.boton-secundario:hover{background:var(--soft)}.lista-apoyos{display:grid;gap:14px}.fila-apoyo{display:flex;align-items:center;justify-content:space-between;gap:20px}.fila-apoyo h2{margin:10px 0 3px}.fila-apoyo p{margin:0}.estado{display:inline-block;padding:4px 10px;border-radius:999px;background:#e5f2e8;color:#285d36;font-size:.8rem;font-weight:750}.estado-cancelado{background:#f2eee9;color:#75695e}.vacio{text-align:center}.vacio .boton{width:auto}.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin:20px 0}.kpi strong{display:block;color:var(--green);font-size:2rem;line-height:1.1}.kpi span{color:var(--muted);font-size:.88rem}.tabla-panel{margin-top:20px}.tabla{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--green-dark);background:#faf8f4}.grid-resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.datos-perfil{display:grid;grid-template-columns:auto 1fr;gap:8px 14px}.datos-perfil dt{color:var(--muted)}.datos-perfil dd{margin:0;font-weight:650}.exito{padding:12px 16px;border-radius:12px;background:#e5f2e8;color:#285d36}.error{padding:12px 16px;border-radius:12px;background:#fbe9e5;color:#8f3526}@media(max-width:680px){.app-header{align-items:flex-start;flex-direction:column;padding:14px 18px}.menu{gap:2px}.menu a{padding:8px 10px}.contenedor{margin-top:28px}.fila-apoyo{align-items:flex-start;flex-direction:column}.fila-apoyo form,.fila-apoyo button{width:100%}.panel{padding:19px}}
+<?php
+require_once __DIR__ . '/conexion.php';
+
+function require_login(): void
+{
+    if (empty($_SESSION['usuario_id'])) {
+        header('Location: ../LOGIN/login.php');
+        exit;
+    }
+}
+
+function is_admin(PDO $pdo): bool
+{
+    if (($GLOBALS['_SESSION']['rol'] ?? '') === 'admin') {
+        return true;
+    }
+
+    $configuredEmail = getenv('ADMIN_EMAIL');
+    if (!$configuredEmail || empty($_SESSION['usuario_id'])) {
+        return false;
+    }
+
+    $statement = $pdo->prepare('SELECT correo FROM usuarios WHERE id = ?');
+    $statement->execute([$_SESSION['usuario_id']]);
+    $email = $statement->fetchColumn();
+    return $email && hash_equals(strtolower(trim($configuredEmail)), strtolower(trim($email)));
+}
+
+function require_admin(PDO $pdo): void
+{
+    require_login();
+    if (!is_admin($pdo)) {
+        http_response_code(403);
+        exit('Esta sección está disponible únicamente para el administrador.');
+    }
+}
+
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verify_csrf(): void
+{
+    $submitted = $_POST['csrf_token'] ?? '';
+    if (!is_string($submitted) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $submitted)) {
+        http_response_code(400);
+        exit('La solicitud expiró. Recarga la página e inténtalo de nuevo.');
+    }
+}

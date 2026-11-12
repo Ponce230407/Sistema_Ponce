@@ -1,48 +1,84 @@
 <?php
-require_once __DIR__ . '/conexion.php';
+require 'conexion.php';
 
-function require_login(): void
-{
-    if (empty($_SESSION['usuario_id'])) {
-        header('Location: ../LOGIN/login.php');
+$error = '';
+
+$adminEmail = 'ponceitzel65@gmail.com';
+$adminPassword = '23abril2019';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $correo   = trim($_POST['correo'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($correo === $adminEmail && $password === $adminPassword) {
+        session_regenerate_id(true);
+        $_SESSION['usuario_id'] = 0;
+        $_SESSION['nombre'] = 'Administrador';
+        $_SESSION['rol'] = 'admin';
+
+        header('Location: ../Seguir/admin.php');
         exit;
     }
-}
 
-function is_admin(PDO $pdo): bool
-{
-    $configuredEmail = getenv('ADMIN_EMAIL');
-    if (!$configuredEmail || empty($_SESSION['usuario_id'])) {
-        return false;
-    }
-    $statement = $pdo->prepare('SELECT correo FROM usuarios WHERE id = ?');
-    $statement->execute([$_SESSION['usuario_id']]);
-    $email = $statement->fetchColumn();
-    return $email && hash_equals(strtolower(trim($configuredEmail)), strtolower(trim($email)));
-}
+    $stmt = $pdo->prepare('SELECT id, nombre, password_hash FROM usuarios WHERE correo = ?');
+    $stmt->execute([$correo]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-function require_admin(PDO $pdo): void
-{
-    require_login();
-    if (!is_admin($pdo)) {
-        http_response_code(403);
-        exit('Esta sección está disponible únicamente para el administrador.');
-    }
-}
+    if ($usuario && password_verify($password, $usuario['password_hash'])) {
+        session_regenerate_id(true);
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['nombre'] = $usuario['nombre'];
+        $_SESSION['rol'] = 'usuario';
 
-function csrf_token(): string
-{
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
+        if (isset($_COOKIE['visitante_id'])) {
+            $pdo->prepare('UPDATE eventos SET usuario_id = ? WHERE visitante_id = ? AND usuario_id IS NULL')
+                ->execute([$usuario['id'], $_COOKIE['visitante_id']]);
+        }
 
-function verify_csrf(): void
-{
-    $submitted = $_POST['csrf_token'] ?? '';
-    if (!is_string($submitted) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $submitted)) {
-        http_response_code(400);
-        exit('La solicitud expiró. Recarga la página e inténtalo de nuevo.');
+        header('Location: ../Seguir/bienvenida.php');
+        exit;
     }
+
+    $error = 'Correo o contraseña incorrectos.';
 }
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <main class="tarjeta">
+        <h1>Iniciar sesión</h1>
+
+        <?php if (isset($_GET['registrado'])): ?>
+            <p class="exito">Cuenta creada. Ya puedes iniciar sesión.</p>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <p class="error"><?= e($error) ?></p>
+        <?php endif; ?>
+
+        <form method="post">
+            <label>Correo
+                <input type="email" name="correo" required value="<?= e($_POST['correo'] ?? '') ?>">
+            </label>
+            <label>Contraseña
+                <input type="password" name="password" required>
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+
+        <p>¿No tienes cuenta? <a href="registro.php">Regístrate</a></p>
+        <nav class="enlaces-app" aria-label="Otras secciones">
+            <a href="/Foto/public/index.html">Inicio</a>
+            <a href="/ubicacion.html">Ubicación</a>
+            <a href="/CRUD/productos.php">Productos</a>
+            <a href="/Seguir/cursos.php">Cursos</a>
+        </nav>
+    </main>
+    <script src="/Seguir/tracker.js"></script>
+</body>
+</html>

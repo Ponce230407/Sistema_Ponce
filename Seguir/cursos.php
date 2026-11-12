@@ -1,39 +1,60 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_login();
-
-$actividades = [
-    'Paseo y socialización',
-    'Apoyo en el refugio',
-    'Colecta de alimento',
-    'Hogar temporal',
-    'Feria de adopción',
-    'Difusión responsable',
-];
-$mensaje = $_SESSION['flash_message'] ?? '';
-unset($_SESSION['flash_message']);
+$stmt = $pdo->prepare('SELECT nombre, correo, sexo, edad, carrera FROM usuarios WHERE id = ?');
+$stmt->execute([$_SESSION['usuario_id']]);
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$usuario) { header('Location: ../LOGIN/logout.php'); exit; }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Formas de ayudar | Patitas con Hogar</title><link rel="stylesheet" href="estilos.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi cuenta | Patitas con Hogar</title>
+  <link rel="stylesheet" href="estilos.css">
 </head>
 <body class="pagina-app">
-<header class="app-header"><a class="marca" href="/Foto/public/index.html">🐾 Patitas con Hogar</a><nav class="menu"><a href="bienvenida.php">Mi cuenta</a><a href="cursos.php" aria-current="page">Formas de ayudar</a><a href="dashboard.php">Mis apoyos</a><a href="../LOGIN/logout.php">Salir</a></nav></header>
-<main class="contenedor">
-  <section class="encabezado-pagina"><p class="ceja">Súmate a la causa</p><h1>Elige cómo quieres ayudar</h1><p>Selecciona una actividad y la fecha en que te gustaría participar. Puedes cancelar tu inscripción desde “Mis apoyos”.</p></section>
-  <?php if ($mensaje): ?><p class="exito"><?= e($mensaje) ?></p><?php endif; ?>
-  <div class="grid-actividades">
-  <?php foreach ($actividades as $actividad): ?>
-    <article class="panel actividad"><span class="icono-pata" aria-hidden="true">🐾</span><h2><?= e($actividad) ?></h2><p>Tu tiempo y entusiasmo pueden hacer una diferencia para los animales que esperan un hogar.</p>
-      <form method="post" action="inscribirse.php" class="form-inscripcion">
-        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>"><input type="hidden" name="actividad" value="<?= e($actividad) ?>">
-        <label>Fecha para ayudar<input type="date" name="fecha" min="<?= date('Y-m-d') ?>" required></label>
-        <button type="submit">Agendar apoyo</button>
-      </form>
-    </article>
-  <?php endforeach; ?>
-  </div>
-</main>
-</body></html>
+  <header class="app-header">
+    <a class="marca" href="/Foto/public/index.html">🐾 Patitas con Hogar</a>
+    <details class="menu-dropdown">
+      <summary class="menu-toggle">Menú ☰</summary>
+      <div class="menu-content">
+        <a href="bienvenida.php">👤 Mi cuenta</a>
+        <a href="cursos.php">📅 Horarios</a>
+        <a href="dashboard.php">📊 Métricas</a>
+        <a href="admin.php">🛡️ Administrador</a>
+        <a href="/LOGIN/logout.php">🚪 Cerrar sesión</a>
+      </div>
+    </details>
+  </header>
+  <main class="contenedor">
+    <section class="encabezado-pagina">
+      <p class="ceja">Bienvenido/a</p>
+      <h1>Hola, <?= e($usuario['nombre']) ?></h1>
+      <p>Desde aquí puedes ver las actividades que te interesan y gestionar tu participación.</p>
+    </section>
+    <div class="grid-resumen">
+      <section class="panel">
+        <h2>Tu perfil</h2>
+        <dl class="datos-perfil">
+          <dt>Correo</dt>
+          <dd><?= e($usuario['correo']) ?></dd>
+          <dt>Carrera</dt>
+          <dd><?= e($usuario['carrera']) ?></dd>
+          <dt>Edad</dt>
+          <dd><?= (int) $usuario['edad'] ?></dd>
+          <dt>Sexo</dt>
+          <dd><?= e($usuario['sexo']) ?></dd>
+        </dl>
+      </section>
+      <section class="panel">
+        <h2>Acciones rápidas</h2>
+        <p>Consulta tus horarios agendados, explora maneras de ayudar y revisa tus métricas de apoyo.</p>
+        <p><a class="boton" href="cursos.php">Ver formas de ayudar</a></p>
+        <p><a class="boton" href="dashboard.php">Mis apoyos</a></p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
