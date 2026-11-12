@@ -28,11 +28,24 @@ try {
 } catch (PDOException $error) {
     error_log('No se pudo conectar con la base de datos: ' . $error->getMessage());
     http_response_code(500);
-    exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_*.');
+    exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_* .');
 }
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+// Volver a abrir la pantalla de inicio de sesión no debe cerrar ni reemplazar una sesión activa.
+$requestPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+if ($requestPath === '/LOGIN/login.php' && isset($_SESSION['usuario_id'])) {
+    if (($_SESSION['rol'] ?? '') === 'admin' || (int) $_SESSION['usuario_id'] === 0) {
+        header('Location: /Seguir/admin.php', true, 303);
+        exit;
+    }
+    if ((int) $_SESSION['usuario_id'] > 0) {
+        header('Location: /Seguir/bienvenida.php', true, 303);
+        exit;
+    }
 }
 
 function e($texto)
