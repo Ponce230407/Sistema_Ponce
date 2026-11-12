@@ -1,4 +1,27 @@
 <?php
-// Menú de las páginas privadas para colaboradores.
+// Menú común de navegación. Las páginas que lo incluyen ya cargaron auth.php.
+$isLoggedIn = !empty($_SESSION['usuario_id']) || (($_SESSION['rol'] ?? '') === 'admin');
+$isAdministrator = $isLoggedIn && function_exists('is_admin') && is_admin($pdo);
 ?>
-<nav class="menu" aria-label="Navegación de colaboradores"><a href="bienvenida.php">Inicio</a><a href="cursos.php">Formas de ayudar</a><a href="dashboard.php">Métricas</a><a href="/Foto/public/index.html">Sitio principal</a><a href="/ubicacion.html">Contacto</a><a href="/CRUD/productos.php">Insumos</a><a href="#" id="cambiar-privacidad">Privacidad</a><a href="logout.php">Salir</a></nav>
+<header class="app-header">
+  <a class="marca" href="/Foto/public/index.html">🐾 Patitas con Hogar</a>
+  <details class="menu-dropdown">
+    <summary class="menu-toggle" aria-label="Abrir menú de navegación">Menú ☰</summary>
+    <nav class="menu-content" aria-label="Navegación principal">
+      <a href="/Foto/public/index.html">🏠 Inicio</a>
+      <a href="/ubicacion.html">📍 Contacto y ubicación</a>
+      <a href="/Foto/public/encuesta.html">🐶 Encuesta</a>
+      <a href="/CRUD/productos.php">📦 Insumos del refugio</a>
+      <?php if ($isLoggedIn): ?>
+        <a href="/Seguir/bienvenida.php">👤 Mi cuenta</a>
+        <a href="/Seguir/cursos.php">🤝 Formas de ayudar</a>
+        <a href="/Seguir/dashboard.php">📅 Mis apoyos</a>
+        <?php if ($isAdministrator): ?><a href="/Seguir/admin.php">🛡️ Administración</a><?php endif; ?>
+        <a href="/LOGIN/logout.php">🚪 Cerrar sesión</a>
+      <?php else: ?>
+        <a href="/LOGIN/login.php">🔑 Iniciar sesión</a>
+        <a href="/LOGIN/registro.php">💛 Quiero colaborar</a>
+      <?php endif; ?>
+    </nav>
+  </details>
+</header>

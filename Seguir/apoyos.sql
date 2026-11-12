@@ -1,7 +1,5 @@
---
--- Esquema para inscripciones a actividades de ayuda.
--- Ejecutar después de importar database.sql y crear la tabla usuarios.
---
+-- Ejecutar dentro de la misma base MySQL que contiene usuarios.
+-- phpMyAdmin: selecciona la base que usa la aplicación y ejecuta este archivo.
 CREATE TABLE IF NOT EXISTS apoyos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,

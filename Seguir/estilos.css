@@ -1,53 +1,9 @@
-<?php
-require_once __DIR__ . '/conexion.php';
-
-function require_login(): void
-{
-    if (empty($_SESSION['usuario_id'])) {
-        header('Location: ../LOGIN/login.php');
-        exit;
-    }
-}
-
-function is_admin(PDO $pdo): bool
-{
-    if (($GLOBALS['_SESSION']['rol'] ?? '') === 'admin') {
-        return true;
-    }
-
-    $configuredEmail = getenv('ADMIN_EMAIL');
-    if (!$configuredEmail || empty($_SESSION['usuario_id'])) {
-        return false;
-    }
-
-    $statement = $pdo->prepare('SELECT correo FROM usuarios WHERE id = ?');
-    $statement->execute([$_SESSION['usuario_id']]);
-    $email = $statement->fetchColumn();
-    return $email && hash_equals(strtolower(trim($configuredEmail)), strtolower(trim($email)));
-}
-
-function require_admin(PDO $pdo): void
-{
-    require_login();
-    if (!is_admin($pdo)) {
-        http_response_code(403);
-        exit('Esta sección está disponible únicamente para el administrador.');
-    }
-}
-
-function csrf_token(): string
-{
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
-
-function verify_csrf(): void
-{
-    $submitted = $_POST['csrf_token'] ?? '';
-    if (!is_string($submitted) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $submitted)) {
-        http_response_code(400);
-        exit('La solicitud expiró. Recarga la página e inténtalo de nuevo.');
-    }
-}
+:root{--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--paper:#fff;--green:#365b45;--green-dark:#244331;--orange:#ef9c55;--line:#e9e3d9;--soft:#f4eee4;--shadow:0 12px 36px rgba(38,56,44,.12)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body.pagina-app{margin:0;min-height:100vh;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit}
+.app-header{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px max(20px,calc((100vw - 1100px)/2));background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(38,56,44,.06)}.marca{font-weight:800;text-decoration:none;color:var(--green-dark);font-size:1.15rem;white-space:nowrap}
+.menu-dropdown{position:relative}.menu-dropdown summary{list-style:none;cursor:pointer;padding:10px 18px;border-radius:12px;background:var(--green);color:#fff;font-weight:700;box-shadow:var(--shadow)}.menu-dropdown summary::-webkit-details-marker{display:none}.menu-dropdown summary:focus-visible,.menu-content a:focus-visible{outline:3px solid var(--orange);outline-offset:2px}.menu-content{display:none;position:absolute;right:0;top:calc(100% + 10px);min-width:235px;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}.menu-dropdown[open] .menu-content{display:block}.menu-content a{display:block;padding:11px 14px;text-decoration:none;color:var(--ink);border-bottom:1px solid #eef1ee;background:#fff}.menu-content a:last-child{border-bottom:0}.menu-content a:hover{background:var(--soft);color:var(--green-dark)}
+.contenedor{max-width:1100px;margin:0 auto;padding:32px 20px 60px}.encabezado-pagina{margin-bottom:24px}.ceja{margin:0 0 8px;color:var(--green);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem}.encabezado-pagina h1{margin:0 0 8px;font-size:clamp(2rem,3vw,2.8rem);color:var(--green-dark)}.encabezado-pagina p{margin:0;color:var(--muted)}
+.grid-resumen,.grid-actividades,.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}.panel,.kpi,.actividad{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}.kpi strong{display:block;font-size:2rem;color:var(--green-dark);margin-bottom:6px}.kpi span{color:var(--muted);font-size:.95rem}.panel h2,.actividad h2{margin-top:0;margin-bottom:12px;color:var(--green-dark)}.datos-perfil{display:grid;grid-template-columns:120px 1fr;gap:8px 12px;margin:0}.datos-perfil dt{font-weight:700;color:var(--green-dark)}.datos-perfil dd{margin:0;color:var(--ink)}
+.boton,button[type=submit]{display:inline-block;background:var(--green);color:#fff;border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}.boton:hover,button[type=submit]:hover{background:var(--green-dark)}.boton-secundario{background:var(--soft);color:var(--green-dark)}.form-inscripcion{display:grid;gap:12px;margin-top:16px}.form-inscripcion label{display:grid;gap:8px;font-weight:600;color:var(--green-dark)}.form-inscripcion input,.form-inscripcion select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}.exito,.aviso{padding:12px 14px;border-radius:10px;margin:0 0 18px}.exito{background:#edf9ee;border:1px solid #bfe6c5;color:#23543a}.aviso{background:#fff5e8;border:1px solid #f0d2a7;color:#714c1e}.error{background:#fff1f1;border:1px solid #f2c1bf;color:#7d2d2a;padding:12px 14px;border-radius:10px;margin:0 0 18px}
+.lista-apoyos{display:grid;gap:16px}.fila-apoyo{display:flex;justify-content:space-between;align-items:center;gap:16px}.fila-apoyo h2{margin:0 0 8px}.estado{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.75rem;font-weight:700;margin-bottom:10px;text-transform:uppercase}.estado-activo{background:#edf9ee;color:#23543a}.estado-cancelado{background:#fff2e7;color:#8a5414}.tabla-panel{overflow:hidden;margin-top:26px}.tabla{overflow:auto;border-radius:14px;border:1px solid var(--line)}.tabla table{width:100%;border-collapse:collapse;background:#fff}.tabla th,.tabla td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tabla th{background:#f7f4ee;color:var(--green-dark)}
+@media(max-width:760px){.app-header{padding:14px 16px}.fila-apoyo{flex-direction:column;align-items:flex-start}.contenedor{padding:24px 16px 48px}}@media(max-width:420px){.marca{font-size:1rem}.menu-dropdown summary{padding:9px 12px}.menu-content{min-width:min(235px,calc(100vw - 32px))}}

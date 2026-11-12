@@ -1,5 +1,13 @@
-# Configuración privada del administrador
+# Solución de errores y configuración de la base de datos
 
-El panel `Seguir/admin.php` y la API de métricas están reservados a una cuenta existente cuyo correo coincida con la variable de entorno `ADMIN_EMAIL`. Configura esa variable desde el panel de secretos de tu proveedor de hosting; no guardes contraseñas ni credenciales de correo en Git, código fuente o capturas. Registra la cuenta mediante el formulario normal y usa una contraseña nueva y única.
+El panel y la agenda necesitan la tabla `apoyos` en **la misma base MySQL a la que se conecta la aplicación** (la variable `DB_NAME` o `MYSQLDATABASE`; el nombre no siempre es `railway`).
 
-Para activar la agenda de apoyos, importa `Seguir/apoyos.sql` en la misma base MySQL que contiene la tabla `usuarios`. Las personas registradas de forma normal tendrán acceso únicamente a sus propias inscripciones; pueden agendar una fecha y cancelar sus apoyos activos. El panel de administración muestra el listado de inscritos y el estado de cada apoyo.
+## Instalar o actualizar el esquema
+
+- En una instalación nueva, importa `database.sql` en la base de datos de la aplicación.
+- Si ya tienes la base y los usuarios, selecciona esa misma base en phpMyAdmin y ejecuta `Seguir/apoyos.sql`. El archivo usa `CREATE TABLE IF NOT EXISTS`, así que no elimina registros existentes.
+- Verifica en phpMyAdmin que aparezcan las tablas `usuarios`, `eventos` y `apoyos`. En SQL puedes ejecutar `SHOW TABLES;` y `DESCRIBE apoyos;`.
+
+La tabla guarda `id`, `usuario_id` (relación con `usuarios.id`), `actividad`, `fecha`, `estado`, `creado_en` y `actualizado_en`. No agregues columnas a `usuarios` para corregir el error mostrado: falta la tabla independiente `apoyos`.
+
+`Seguir/admin.php` ahora muestra una advertencia de configuración en vez de una pantalla fatal si falta la tabla. Para activar el acceso de administrador, configura `ADMIN_EMAIL` en el hosting con el correo de una cuenta registrada. No guardes contraseñas ni secretos en el repositorio.

@@ -1,44 +1,14 @@
-:root{--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--paper:#fff;--green:#365b45;--green-dark:#244331;--orange:#ef9c55;--line:#e9e3d9;--soft:#f4eee4;--shadow:0 12px 36px rgba(38,56,44,.12)}
-*{box-sizing:border-box}
-body.pagina-app{margin:0;min-height:100vh;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
-a{color:inherit}
-.app-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 24px;background:rgba(255,255,255,.75);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
-.marca{font-weight:800;text-decoration:none;color:var(--green-dark);font-size:1.15rem}
-.contenedor{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
-.encabezado-pagina{margin-bottom:24px}
-.ceja{margin:0 0 8px;color:var(--green);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem}
-.encabezado-pagina h1{margin:0 0 8px;font-size:clamp(2rem,3vw,2.8rem);color:var(--green-dark)}
-.encabezado-pagina p{margin:0;color:var(--muted)}
-.grid-resumen,.grid-actividades,.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.panel,.kpi,.actividad{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
-.kpi strong{display:block;font-size:2rem;color:var(--green-dark);margin-bottom:6px}
-.kpi span{color:var(--muted);font-size:.95rem}
-.panel h2,.actividad h2{margin-top:0;margin-bottom:12px;color:var(--green-dark)}
-.datos-perfil{display:grid;grid-template-columns:120px 1fr;gap:8px 12px;margin:0}
-.datos-perfil dt{font-weight:700;color:var(--green-dark)}
-.datos-perfil dd{margin:0;color:var(--ink)}
-.boton,button[type="submit"]{display:inline-block;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none;cursor:pointer}
-.form-inscripcion{display:grid;gap:12px;margin-top:16px}
-.form-inscripcion label{display:grid;gap:8px;font-weight:600;color:var(--green-dark)}
-.form-inscripcion input,.form-inscripcion select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit}
-.exito{background:#edf9ee;border:1px solid #bfe6c5;color:#23543a;padding:12px 14px;border-radius:10px;margin:0 0 18px}
-.error{background:#fff1f1;border:1px solid #f2c1bf;color:#7d2d2a;padding:12px 14px;border-radius:10px;margin:0 0 18px}
-.lista-apoyos{display:grid;gap:16px}
-.fila-apoyo{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.fila-apoyo h2{margin:0 0 8px}
-.estado{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.75rem;font-weight:700;margin-bottom:10px;text-transform:uppercase}
-.estado-activo{background:#edf9ee;color:#23543a}
-.estado-cancelado{background:#fff2e7;color:#8a5414}
-.tabla-panel{overflow:hidden}
-.tabla{overflow:auto;border-radius:14px;border:1px solid var(--line)}
-.tabla table{width:100%;border-collapse:collapse;background:#fff}
-.tabla th,.tabla td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.tabla th{background:#f7f4ee;color:var(--green-dark)}
-.menu-dropdown{position:relative;display:inline-block}
-.menu-dropdown summary{list-style:none;cursor:pointer;padding:10px 18px;border-radius:12px;background:var(--green);color:white;font-weight:700;box-shadow:var(--shadow)}
-.menu-dropdown summary::-webkit-details-marker{display:none}
-.menu-content{display:none;position:absolute;right:0;top:calc(100% + 10px);min-width:220px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);z-index:100}
-.menu-dropdown[open] .menu-content{display:block}
-.menu-content a{display:block;padding:12px 14px;text-decoration:none;color:var(--ink);border-bottom:1px solid #eef1ee;background:#fff}
-.menu-content a:hover{background:#f5f8f4}
-@media (max-width:760px){.app-header{padding:14px 16px}.fila-apoyo{flex-direction:column;align-items:flex-start}.contenedor{padding:24px 16px 48px}} 
+<?php
+require_once __DIR__ . '/auth.php';
+require_login();
+$stmt = $pdo->prepare('SELECT nombre, correo, sexo, edad, carrera FROM usuarios WHERE id = ?');
+$stmt->execute([(int) $_SESSION['usuario_id']]);
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$usuario) { header('Location: ../LOGIN/logout.php'); exit; }
+?>
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mi cuenta | Patitas con Hogar</title><link rel="stylesheet" href="estilos.css"></head>
+<body class="pagina-app">
+<?php require __DIR__ . '/menu.php'; ?>
+<main class="contenedor"><section class="encabezado-pagina"><p class="ceja">Bienvenido/a</p><h1>Hola, <?= e($usuario['nombre']) ?></h1><p>Desde aquí puedes consultar tus apoyos y elegir nuevas actividades.</p></section>
+<div class="grid-resumen"><section class="panel"><h2>Tu perfil</h2><dl class="datos-perfil"><dt>Correo</dt><dd><?= e($usuario['correo']) ?></dd><dt>Carrera</dt><dd><?= e($usuario['carrera']) ?></dd><dt>Edad</dt><dd><?= (int) $usuario['edad'] ?></dd><dt>Sexo</dt><dd><?= e($usuario['sexo']) ?></dd></dl></section><section class="panel"><h2>¿Cómo quieres participar?</h2><p>Agenda un paseo, ayuda en el refugio, participa en una colecta o elige otra forma de apoyar.</p><a class="boton" href="cursos.php">Explorar formas de ayudar</a></section><section class="panel"><h2>Consulta tus fechas</h2><p>Revisa tus apoyos agendados o cancela una actividad si cambian tus planes.</p><a class="boton boton-secundario" href="dashboard.php">Ver mis apoyos</a></section></div>
+</main></body></html>
