@@ -1,16 +1,22 @@
 <?php
 require 'conexion.php';
+
 $error = '';
+$adminEmail = strtolower(trim((string) (getenv('ADMIN_EMAIL') ?: 'ponceitzel65@gmail.com')));
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nombre = trim($_POST['nombre'] ?? '');
-    $correo = trim($_POST['correo'] ?? '');
-    $sexo = $_POST['sexo'] ?? '';
-    $edad = (int) ($_POST['edad'] ?? 0);
-    $carrera = trim($_POST['carrera'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmar = $_POST['confirmar'] ?? '';
-    if ($nombre === '' || $carrera === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)
-        || !in_array($sexo, ['Hombre', 'Mujer', 'Otro'], true) || $edad < 15 || $edad > 99) {
+    $nombre = trim((string) ($_POST['nombre'] ?? ''));
+    $correo = strtolower(trim((string) ($_POST['correo'] ?? '')));
+    $sexo = (string) ($_POST['sexo'] ?? '');
+    $edad = filter_var($_POST['edad'] ?? null, FILTER_VALIDATE_INT);
+    $carrera = trim((string) ($_POST['carrera'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+    $confirmar = (string) ($_POST['confirmar'] ?? '');
+
+    if ($correo !== '' && hash_equals($adminEmail, $correo)) {
+        $error = 'Ese correo está reservado para la cuenta administradora y no puede registrarse.';
+    } elseif ($nombre === '' || $carrera === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)
+        || !in_array($sexo, ['Hombre', 'Mujer', 'Otro'], true) || $edad === false || $edad < 15 || $edad > 99) {
         $error = 'Revisa que todos los datos sean válidos.';
     } elseif (strlen($password) < 8) {
         $error = 'La contraseña debe tener al menos 8 caracteres.';
@@ -24,10 +30,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: login.php?registrado=1');
             exit;
         } catch (PDOException $ex) {
-            if ($ex->getCode() !== '23000') throw $ex;
+            if ($ex->getCode() !== '23000') {
+                throw $ex;
+            }
             $error = 'Ese correo ya está registrado.';
         }
     }
 }
 ?>
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Únete como colaborador | Patitas con Hogar</title><link rel="stylesheet" href="estilos.css"></head><body><main class="tarjeta"><p><a href="/Foto/public/index.html">← Patitas con Hogar</a></p><h1>Únete a la manada 🐾</h1><p>Crea una cuenta para conocer actividades y formas de colaborar.</p><?php if ($error): ?><p class="error"><?= e($error) ?></p><?php endif; ?><form id="form-registro" method="post"><label>Nombre<input type="text" name="nombre" maxlength="100" required value="<?= e($_POST['nombre'] ?? '') ?>"></label><label>Correo electrónico<input type="email" name="correo" maxlength="150" required value="<?= e($_POST['correo'] ?? '') ?>"></label><label>¿Cómo te identificas?<select name="sexo" required><option value="">Selecciona…</option><?php foreach (['Hombre', 'Mujer', 'Otro'] as $opcion): ?><option <?= ($_POST['sexo'] ?? '') === $opcion ? 'selected' : '' ?>><?= $opcion ?></option><?php endforeach; ?></select></label><label>Edad<input type="number" name="edad" min="15" max="99" required value="<?= e($_POST['edad'] ?? '') ?>"></label><label>¿Cómo te gustaría colaborar?<select name="carrera" required><option value="">Selecciona…</option><?php foreach (['Voluntariado', 'Adopción', 'Hogar temporal', 'Donaciones', 'Difusión'] as $opcion): ?><option <?= ($_POST['carrera'] ?? '') === $opcion ? 'selected' : '' ?>><?= e($opcion) ?></option><?php endforeach; ?></select></label><label>Contraseña<input type="password" name="password" minlength="8" required></label><label>Confirmar contraseña<input type="password" name="confirmar" minlength="8" required></label><button type="submit">Crear cuenta</button></form><p>¿Ya tienes cuenta? <a href="login.php">Inicia sesión</a></p><nav class="enlaces-app" aria-label="Otras secciones"><a href="/Foto/public/index.html">Inicio</a><a href="/ubicacion.html">Contacto</a><a href="/CRUD/productos.php">Insumos</a></nav></main><script src="app.js"></script><script src="/Seguir/tracker.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Únete como colaborador | Patitas con Hogar</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <main class="tarjeta">
+        <p><a href="/Foto/public/index.html">🐾 Patitas con Hogar</a></p>
+        <h1>Únete como colaborador</h1>
+        <?php if ($error): ?><p class="error"><?= e($error) ?></p><?php endif; ?>
+        <form method="post" action="registro.php" autocomplete="on">
+            <label>Nombre
+                <input type="text" name="nombre" required maxlength="100" autocomplete="name" value="<?= e($_POST['nombre'] ?? '') ?>">
+            </label>
+            <label>Correo
+                <input type="email" name="correo" required maxlength="150" autocomplete="email" value="<?= e($_POST['correo'] ?? '') ?>">
+            </label>
+            <label>Sexo
+                <select name="sexo" required>
+                    <option value="">Selecciona una opción</option>
+                    <?php foreach (['Hombre', 'Mujer', 'Otro'] as $opcion): ?>
+                        <option value="<?= e($opcion) ?>" <?= (($_POST['sexo'] ?? '') === $opcion) ? 'selected' : '' ?>><?= e($opcion) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Edad
+                <input type="number" name="edad" min="15" max="99" required value="<?= e($_POST['edad'] ?? '') ?>">
+            </label>
+            <label>Ocupación o carrera
+                <input type="text" name="carrera" required maxlength="100" value="<?= e($_POST['carrera'] ?? '') ?>">
+            </label>
+            <label>Contraseña
+                <input type="password" name="password" required minlength="8" autocomplete="new-password">
+            </label>
+            <label>Confirma tu contraseña
+                <input type="password" name="confirmar" required minlength="8" autocomplete="new-password">
+            </label>
+            <button type="submit">Crear cuenta</button>
+        </form>
+        <p>¿Ya tienes cuenta? <a href="login.php">Inicia sesión</a></p>
+        <nav class="enlaces-app" aria-label="Otras secciones">
+            <a href="/Foto/public/index.html">Inicio</a>
+            <a href="/ubicacion.html">Ubicación</a>
+            <a href="/Foto/public/encuesta.html">Encuesta</a>
+        </nav>
+    </main>
+</body>
+</html>
