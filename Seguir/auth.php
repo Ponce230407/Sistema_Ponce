@@ -3,7 +3,7 @@ require_once __DIR__ . '/conexion.php';
 
 function require_login(): void
 {
-    if (empty($_SESSION['usuario_id'])) {
+    if (empty($_SESSION['usuario_id']) && ($_SESSION['rol'] ?? '') !== 'admin') {
         header('Location: ../LOGIN/login.php');
         exit;
     }
@@ -11,14 +11,20 @@ function require_login(): void
 
 function is_admin(PDO $pdo): bool
 {
-    $configuredEmail = getenv('ADMIN_EMAIL');
-    if (!$configuredEmail || empty($_SESSION['usuario_id'])) {
+    $configuredEmail = strtolower(trim(getenv('ADMIN_EMAIL') ?: 'ponceitzel65@gmail.com'));
+    if (($_SESSION['rol'] ?? '') === 'admin') {
+        return isset($_SESSION['admin_email'])
+            && hash_equals($configuredEmail, strtolower(trim((string) $_SESSION['admin_email'])));
+    }
+
+    if (empty($_SESSION['usuario_id'])) {
         return false;
     }
+
     $statement = $pdo->prepare('SELECT correo FROM usuarios WHERE id = ?');
     $statement->execute([$_SESSION['usuario_id']]);
     $email = $statement->fetchColumn();
-    return $email && hash_equals(strtolower(trim($configuredEmail)), strtolower(trim($email)));
+    return $email && hash_equals($configuredEmail, strtolower(trim((string) $email)));
 }
 
 function require_admin(PDO $pdo): void
