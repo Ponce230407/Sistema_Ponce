@@ -7,7 +7,80 @@
   <meta name="description" content="Conoce a Morena, Pelusa y Negra: tres perritas que buscan una familia. Pregunta por su adopción por WhatsApp.">
   <title>Adopta | Patitas con Hogar</title>
   <style>
-    :root{--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--green:#365b45;--orange:#ef9c55;--line:#e9e3d9;--soft:#f4eee4;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--cream);color:var(--ink)}a{text-decoration:none;color:inherit}.wrap{max-width:1180px;margin:0 auto;padding:0 24px}.topbar{background:rgba(255,255,255,0.7);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.nav{display:flex;align-items:center;justify-content:space-between;min-height:72px}.brand{font-weight:900;font-size:clamp(1.4rem,2vw,2rem);letter-spacing:-.04em;color:var(--green)}.links{display:flex;align-items:center;gap:26px;flex-wrap:wrap}.links a{font-weight:700;font-size:1.15rem;color:var(--ink)}.links a:last-child{padding:12px 18px;border-radius:999px;background:#f4eee4;border:1px solid rgba(54,91,69,.18);box-shadow:inset 0 0 0 1px rgba(54,91,69,.04)}.links a:last-child:hover{background:#e9e3d9}.hero{display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:50px;padding:56px 0 42px}.tag{margin:0 0 20px;color:var(--green);font-weight:800;font-size:1.1rem}.hero h1{font-size:clamp(3.6rem,6vw,7rem);line-height:.9;letter-spacing:-.06em;margin:0 0 24px;max-width:620px}.hero p{font-size:1.25rem;line-height:1.6;color:var(--muted);max-width:620px}.button{display:inline-block;margin-top:22px;padding:16px 32px;border-radius:14px;background:var(--green);color:#fff;font-weight:800;font-size:1.05rem;box-shadow:0 12px 24px rgba(54,91,69,.18)}.button:hover{background:#2c4a39}.hero-art img{width:100%;max-width:560px;display:block;border-radius:30px;box-shadow:0 20px 40px rgba(40,53,46,.12)}.section{padding:44px 0 34px}.section.soft{background:#f2ece3}.section h2{font-size:clamp(2.6rem,5vw,5.1rem);letter-spacing:-.06em;margin:0 0 12px}.sub{font-size:1.15rem;color:var(--muted);margin:0 0 28px}.cards{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:22px}.dog-card{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 20px 40px rgba(40,53,46,.06)}.dog-card img{height:340px;width:100%;object-fit:cover;display:block}.dog-info{padding:18px 18px 22px}.dog-info h3{font-size:2rem;letter-spacing:-.05em;margin:0 0 12px}.dog-info p{margin:0 0 18px;color:var(--muted);font-size:1.02rem;line-height:1.6}.dog-card .button{margin-top:0;padding:12px 18px;border-radius:12px;font-size:1rem}.footer{padding:30px 0 52px}.footer .wrap{border-top:1px solid var(--line);padding-top:20px;text-align:center;color:var(--muted)}@media (max-width: 900px){.hero{grid-template-columns:1fr;padding-top:30px}.hero-art{display:flex;justify-content:center}.cards{grid-template-columns:1fr}.nav{flex-wrap:wrap;justify-content:center;padding:10px 0}.links{justify-content:center;padding-bottom:8px}}@media (max-width: 520px){.topbar{position:static}.wrap{padding:0 16px}.links{gap:14px}.links a{font-size:1rem}.hero h1{font-size:3.2rem}.dog-card img{height:260px}}
+    :root{--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--green:#365b45;--orange:#ef9c55;--line:#e9e3d9;--soft:#f4eee4;--white:#fff}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:90px}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--cream);color:var(--ink)}
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%}
+    .wrap{width:min(1180px,100%);margin:0 auto;padding:0 24px}
+    .topbar{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:72px}
+    .brand{font-weight:900;font-size:clamp(1.25rem,2vw,2rem);letter-spacing:-.04em;color:var(--green);white-space:nowrap}
+    .links{display:flex;align-items:center;justify-content:flex-end;gap:clamp(12px,2.4vw,26px);flex-wrap:wrap}
+    .links a{font-weight:700;font-size:clamp(.95rem,1.3vw,1.15rem);color:var(--ink)}
+    .links a[data-login-link]{padding:10px 14px;border-radius:999px;background:#f4eee4;border:1px solid rgba(54,91,69,.18);box-shadow:inset 0 0 0 1px rgba(54,91,69,.04);text-align:center}
+    .links a[data-login-link]:hover{background:#e9e3d9}
+    .hero{display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:50px;padding-top:56px;padding-bottom:42px}
+    .tag{margin:0 0 20px;color:var(--green);font-weight:800;font-size:1.1rem}
+    .hero h1{font-size:clamp(3.2rem,6vw,7rem);line-height:.96;letter-spacing:-.06em;margin:0 0 24px;max-width:620px}
+    .hero p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.6;color:var(--muted);max-width:620px}
+    .button{display:inline-block;margin-top:22px;padding:15px 26px;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:1.02rem;box-shadow:0 12px 24px rgba(54,91,69,.18);text-align:center}
+    .button:hover{background:#2c4a39}
+    .hero-art{min-width:0}
+    .hero-art img{width:100%;max-width:560px;max-height:430px;object-fit:cover;display:block;margin:auto;border:10px solid #f1dfca;border-radius:32px}
+    .section{padding:44px 0 36px}
+    .section.soft{background:#f2ece3}
+    .section h2{font-size:clamp(2.2rem,4.4vw,4rem);line-height:1.1;letter-spacing:-.05em;margin:0 0 12px}
+    .sub{font-size:1.1rem;line-height:1.6;color:var(--muted);margin:0 0 28px}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+    .dog-card,.community-card{min-width:0;background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 16px 36px rgba(40,53,46,.07)}
+    .dog-card img{height:300px;width:100%;object-fit:cover;display:block}
+    .dog-info{padding:18px 18px 22px}
+    .dog-info h3,.community-card h3{font-size:1.8rem;letter-spacing:-.04em;margin:0 0 10px}
+    .dog-info p,.community-card p{margin:0 0 18px;color:var(--muted);font-size:1rem;line-height:1.6;overflow-wrap:anywhere}
+    .dog-card .button{margin-top:0;padding:12px 18px;border-radius:12px;font-size:.98rem}
+    #publicaciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px}
+    .community-card img{width:100%;height:240px;object-fit:cover;display:block}
+    .community-card h3,.community-card p{margin-left:18px;margin-right:18px}
+    .community-card h3{margin-top:16px}
+    .footer{padding:30px 0 48px}
+    .footer .wrap{border-top:1px solid var(--line);padding-top:20px;text-align:center;color:var(--muted)}
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr;gap:30px;padding-top:38px}
+      .hero-art img{max-height:380px}
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:600px){
+      html{scroll-padding-top:130px}
+      .wrap{padding-left:18px;padding-right:18px}
+      .nav{min-height:0;flex-direction:column;justify-content:center;gap:8px;padding-top:12px;padding-bottom:12px}
+      .brand{font-size:1.25rem}
+      .links{width:100%;justify-content:center;gap:6px 16px}
+      .links a{font-size:.92rem;padding:6px 0}
+      .links a[data-login-link]{padding:8px 12px;max-width:100%;overflow-wrap:anywhere}
+      .hero{padding-top:30px;padding-bottom:30px;gap:22px}
+      .tag{font-size:.98rem;margin-bottom:14px}
+      .hero h1{font-size:clamp(2.8rem,13vw,4.2rem);margin-bottom:16px}
+      .hero p{font-size:1rem;margin-top:0}
+      .hero-art img{max-height:300px;border-width:7px;border-radius:24px}
+      .button{padding:13px 20px;font-size:.96rem}
+      .section{padding:34px 0 28px}
+      .section h2{font-size:clamp(2rem,9vw,2.8rem)}
+      .sub{font-size:1rem;margin-bottom:20px}
+      .cards{grid-template-columns:1fr;gap:16px}
+      .dog-card img{height:auto;max-height:340px;aspect-ratio:4/3}
+      .dog-info{padding:16px}
+      .dog-info h3,.community-card h3{font-size:1.6rem}
+      #publicaciones{grid-template-columns:1fr}
+      .community-card img{height:auto;max-height:320px;aspect-ratio:4/3}
+    }
+    @media(max-width:360px){
+      .wrap{padding-left:14px;padding-right:14px}
+      .links{column-gap:10px}
+      .links a{font-size:.86rem}
+      .hero h1{font-size:2.7rem}
+    }
   </style>
 </head>
 <body>
@@ -24,6 +97,7 @@
   </main>
   <footer class="footer"><div class="wrap">© 2026 Patitas con Hogar · <a href="/Foto/ubicacion.php">Contacto y ubicación</a></div></footer>
   <script>
+  (async()=>{const enlace=document.querySelector('[data-login-link]');try{const response=await fetch('/Foto/public/estado-sesion.php',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'});if(!response.ok)return;const estado=await response.json();if(!estado||!estado.autenticado)return;enlace.href=estado.es_admin?'/Seguir/admin.php':'/Seguir/bienvenida.php';enlace.textContent=estado.nombre|| (estado.es_admin?'Administración':'Mi cuenta')}catch{}})();
   (async()=>{const box=document.getElementById('publicaciones');try{const response=await fetch('/Foto/public/perros.php',{headers:{Accept:'application/json'}});if(!response.ok)throw new Error();const data=await response.json();if(!Array.isArray(data)||!data.length){box.innerHTML='<p class="empty">Aún no hay historias compartidas.</p>';return}box.innerHTML=data.map((item)=>`<article class="community-card"><img src="${item.foto}" alt="${item.nombre}"><h3>${item.nombre}</h3><p>${item.historia}</p></article>`).join('')}catch{box.innerHTML='<p class="empty">No se pudieron cargar las historias.</p>'}})();
   </script><script src="/Seguir/tracker.js"></script>
 </body>
