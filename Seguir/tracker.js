@@ -1,8 +1,6 @@
 (() => {
     const API = '/Seguir/api/eventos.php';
 
-    // Public pages share the same menu fragment. Fetch own session name without
-    // exposing session identifiers or other personal data to the page.
     fetch('/Seguir/session-info.php', { credentials: 'same-origin', cache: 'no-store' })
         .then((response) => response.ok ? response.json() : null)
         .then((info) => {
@@ -12,6 +10,7 @@
             });
             document.querySelectorAll('[data-auth-link]').forEach((node) => { node.hidden = !info.logged_in; });
             document.querySelectorAll('[data-guest-link]').forEach((node) => { node.hidden = info.logged_in; });
+            document.querySelectorAll('[data-admin-link]').forEach((node) => { node.hidden = !info.is_admin; });
         }).catch(() => {});
 
     function leerCookie(nombre) {
