@@ -1,4 +1,4 @@
-<style>
-    .crud-menu{max-width:1140px;margin:0 auto 1.5rem;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;background:#365b45;color:#fff;border-radius:12px;font-family:system-ui,sans-serif}.crud-menu a{color:inherit;text-decoration:none}.crud-menu-brand{display:flex;align-items:center;gap:.65rem;font-weight:800}.crud-menu-photo{width:42px;height:42px;border:2px solid #fff;border-radius:50%;object-fit:cover;background:#e8f0e7}.crud-menu details{position:relative}.crud-menu summary{padding:.5rem .75rem;cursor:pointer;list-style:none;border:1px solid #ffffff80;border-radius:999px}.crud-menu summary::-webkit-details-marker{display:none}.crud-menu summary::after{content:" \25BE"}.crud-menu-links{position:absolute;top:calc(100% + .35rem);right:0;z-index:10;min-width:210px;padding:.35rem 0;background:#fff;color:#28352e;border:1px solid #e9e3d9;border-radius:10px;box-shadow:0 4px 12px #0002}.crud-menu-links a{display:block;padding:.6rem .8rem}.crud-menu-links a:hover,.crud-menu-links a:focus{background:#f4eee4}
-</style>
-<nav class="crud-menu" aria-label="Navegación principal"><a class="crud-menu-brand" href="../Foto/public/index.html"><span class="crud-menu-photo" aria-hidden="true">🐾</span><span>Patitas con Hogar</span></a><details><summary>Ir a</summary><div class="crud-menu-links"><a href="../Foto/public/index.html">Inicio</a><a href="../ubicacion.html">Contacto y ubicación</a><a href="productos.php">Insumos del refugio</a><a href="../Foto/public/encuesta.html">Cuéntanos tu experiencia</a><a href="../LOGIN/login.php">Iniciar sesión</a><a href="../LOGIN/registro.php">Colaborar</a></div></details></nav>
+<?php
+// Use exactly the same full navigation as the public pages.
+require __DIR__ . '/../Foto/public/nav.html';
+?>
