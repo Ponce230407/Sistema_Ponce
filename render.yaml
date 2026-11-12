@@ -1,8 +1,3 @@
-<?php
-$whatsappNumber = preg_replace('/\D+/', '', (string) getenv('WHATSAPP_NUMBER'));
-$contactEmail = trim((string) getenv('CONTACT_EMAIL'));
-$shelterAddress = trim((string) getenv('REFUGIO_DIRECCION'));
-?>
 services:
   - type: web
     name: app-web
