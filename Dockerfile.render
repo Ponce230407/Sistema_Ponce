@@ -1,6 +1,7 @@
 FROM php:8.2-apache
 
 # PDO, MySQLi and multibyte string support used by the app.
+RUN apt-get update && apt-get install -y libonig-dev && rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-install pdo pdo_mysql mysqli mbstring
 
 COPY . /var/www/html/
