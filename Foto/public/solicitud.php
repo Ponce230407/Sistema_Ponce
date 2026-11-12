@@ -51,7 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
             $statement = $pdo->prepare('INSERT INTO solicitudes_adopcion_voluntariado (nombre, correo, telefono, tipo, perro, motivo, hogar, disponibilidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             $statement->execute([$nombre, $correo, $telefono, $tipo, $perro, $motivo, $hogar, $disponibilidad]);
-            $enviada = true;
+
+            $etiquetaTipo = $tipo === 'adopcion' ? 'Adopción' : 'Voluntariado';
+            $mensaje = "Hola, envié una solicitud de {$etiquetaTipo} desde Patitas con Hogar.\n\n";
+            $mensaje .= "Nombre: {$nombre}\nCorreo: {$correo}\nTeléfono: " . ($telefono !== '' ? $telefono : 'No indicado') . "\n";
+            if ($tipo === 'adopcion') {
+                $mensaje .= "Perro que me interesó: {$perro}\nDónde viviría: {$hogar}\n";
+            }
+            $mensaje .= "Motivo: {$motivo}\nDisponibilidad: " . ($disponibilidad !== '' ? $disponibilidad : 'No indicada') . "\n\nPor favor, revisen mi solicitud y contáctenme.";
+
+            // WhatsApp requiere el número en formato internacional: México (52) + los 10 dígitos.
+            header('Location: https://wa.me/525537574716?text=' . rawurlencode($mensaje), true, 303);
+            exit;
         } catch (Throwable $exception) {
             error_log('No se pudo guardar la solicitud: ' . $exception->getMessage());
             $error = 'No pudimos enviar tu solicitud en este momento. Inténtalo más tarde.';
@@ -94,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <label for="motivo" id="motivo-label">¿Por qué te interesa adoptar o participar?</label><textarea id="motivo" name="motivo" minlength="10" maxlength="2000" required placeholder="Cuéntanos tus motivos y cualquier detalle que debamos conocer."><?= solicitud_h($_POST['motivo'] ?? '') ?></textarea>
         <label for="disponibilidad">¿Qué disponibilidad tienes? (opcional)</label><textarea id="disponibilidad" name="disponibilidad" maxlength="500" placeholder="Días, horarios u otra información útil."><?= solicitud_h($_POST['disponibilidad'] ?? '') ?></textarea>
-        <p class="help">Tus datos se usarán para revisar esta solicitud y contactarte sobre ella.</p>
-        <button class="button" type="submit">Enviar solicitud 🐾</button>
+        <p class="help">Tus datos se guardarán para revisar la solicitud y se incluirán en el mensaje que se abrirá en WhatsApp.</p>
+        <button class="button" type="submit">Continuar a WhatsApp y enviar solicitud 🐾</button>
       </form>
       <a class="button secondary" href="/Foto/ubicacion.html">Volver a contacto</a>
     <?php endif; ?>
