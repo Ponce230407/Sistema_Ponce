@@ -1,140 +1,103 @@
-// Rastreador de analítica y mejoras comunes de navegación.
-
+// Navegación, historias de la comunidad y analítica básica.
 (() => {
-    const API = '/Seguir/api/eventos.php';
-
-    // La portada es HTML estático; consultar la sesión permite mostrar claramente
-    // que el usuario sigue dentro aunque haya vuelto al inicio.
     fetch('/Foto/public/estado-sesion.php', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
         .then((response) => response.ok ? response.json() : null)
-        .then((estado) => {
-            if (!estado || !estado.autenticado) return;
+        .then((state) => {
+            if (!state || !state.autenticado) return;
             document.querySelectorAll('[data-session-indicator]').forEach((badge) => {
-                badge.textContent = estado.nombre ? `Sesión iniciada · ${estado.nombre}` : 'Sesión iniciada';
+                badge.textContent = state.nombre ? `Sesión iniciada · ${state.nombre}` : 'Sesión iniciada';
                 badge.classList.add('is-visible');
             });
             document.querySelectorAll('[data-login-link]').forEach((link) => {
-                link.href = estado.es_admin ? '/Seguir/admin.php' : '/Seguir/bienvenida.php';
-                link.textContent = estado.es_admin ? '🛡️ Panel de administración' : '👤 Mi cuenta';
+                link.href = state.es_admin ? '/Seguir/admin.php' : '/Seguir/bienvenida.php';
+                link.textContent = state.es_admin ? '🛡️ Panel de administración' : '👤 Mi cuenta';
             });
             document.querySelectorAll('[data-register-link]').forEach((link) => link.remove());
         }).catch(() => {});
 
-    // La portada conserva sus tarjetas de adopción por separado, pero la sección
-    // comunitaria solo muestra recuerdos felices, nunca solicitudes de adopción.
     const community = document.getElementById('publicaciones');
     if (community) {
         const heading = community.parentElement.querySelector('h2');
         const intro = community.parentElement.querySelector('.sub');
         if (heading) heading.textContent = 'Momentos felices de la comunidad';
-        if (intro) intro.textContent = 'Fotos y recuerdos compartidos por personas que quieren a sus perritos. No son publicaciones de adopción.';
-        const renderExperiences = async () => {
+        if (intro) intro.textContent = 'Comparte recuerdos bonitos con tus mascotas, mira los de otras personas y deja un corazón.';
+        community.innerHTML = '<p class="empty">Cargando momentos felices…</p>';
+        const style = document.createElement('style');
+        style.textContent = '.community-card{padding-bottom:16px}.community-card h3,.community-card p{margin-left:18px;margin-right:18px}.community-card h3{margin-top:16px}.community-actions{display:flex;align-items:center;gap:10px;margin:0 18px}.community-actions button{border:0;border-radius:999px;padding:9px 14px;font:inherit;font-weight:750;cursor:pointer}.heart-button{background:#fff0f1;color:#9e2941}.heart-button[aria-pressed="true"]{background:#ffe0e5;color:#a31535}.delete-button{background:#f4eee4;color:#543d32}.community-actions button:disabled{opacity:.6;cursor:wait}';
+        document.head.append(style);
+        let csrf = '';
+        const loadExperiences = async () => {
             try {
-                const response = await fetch('/Foto/public/perros.php', { headers: { Accept: 'application/json' } });
-                if (!response.ok) throw new Error('No se pudieron cargar las experiencias.');
-                const experiences = await response.json();
+                const response = await fetch('/Foto/public/experiencias.php', { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                csrf = data.csrf || csrf;
                 community.replaceChildren();
-                if (!Array.isArray(experiences) || !experiences.length) {
-                    const empty = document.createElement('p');
-                    empty.className = 'empty';
-                    empty.textContent = 'Aún no hay experiencias compartidas. ¡Comparte la primera!';
-                    community.append(empty);
-                } else {
-                    experiences.forEach((experience) => {
-                        const card = document.createElement('article');
-                        card.className = 'community-card';
-                        const image = document.createElement('img');
-                        image.src = experience.foto;
-                        image.alt = `Foto de ${experience.nombre}`;
-                        const title = document.createElement('h3');
-                        title.textContent = experience.nombre;
-                        const story = document.createElement('p');
-                        story.textContent = experience.historia;
-                        card.append(image, title, story);
-                        community.append(card);
-                    });
+                if (!Array.isArray(data.experiencias) || data.experiencias.length === 0) {
+                    const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = 'Aún no hay momentos compartidos. ¡Comparte el primero!'; community.append(empty); return;
                 }
+                data.experiencias.forEach((item) => {
+                    const card = document.createElement('article'); card.className = 'community-card';
+                    const image = document.createElement('img'); image.src = item.foto; image.alt = `Foto de ${item.nombre}`; image.loading = 'lazy';
+                    const title = document.createElement('h3'); title.textContent = item.nombre;
+                    const story = document.createElement('p'); story.textContent = item.historia;
+                    const actions = document.createElement('div'); actions.className = 'community-actions';
+                    const heart = document.createElement('button'); heart.type = 'button'; heart.className = 'heart-button'; heart.setAttribute('aria-pressed', Number(item.me_gusta) === 1 ? 'true' : 'false'); heart.textContent = `❤️ ${Number(item.corazones) || 0}`; heart.setAttribute('aria-label', `Dar corazón. ${Number(item.corazones) || 0} corazones`);
+                    heart.addEventListener('click', async () => {
+                        heart.disabled = true;
+                        try {
+                            const body = new URLSearchParams({ accion: 'corazon', id: item.id, csrf_token: csrf });
+                            const result = await fetch('/Foto/public/experiencias.php', { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+                            const updated = await result.json(); if (!result.ok) throw new Error(updated.error || 'No se pudo guardar el corazón.');
+                            item.me_gusta = updated.me_gusta ? 1 : 0; item.corazones = updated.corazones;
+                            heart.setAttribute('aria-pressed', updated.me_gusta ? 'true' : 'false'); heart.textContent = `❤️ ${updated.corazones}`;
+                        } catch (error) { alert(error.message); } finally { heart.disabled = false; }
+                    });
+                    actions.append(heart);
+                    if (Number(item.puede_borrar) === 1) {
+                        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'delete-button'; remove.textContent = '🗑️ Borrar';
+                        remove.addEventListener('click', async () => {
+                            if (!confirm('¿Seguro que quieres borrar esta foto?')) return;
+                            remove.disabled = true;
+                            try {
+                                const body = new URLSearchParams({ accion: 'borrar', id: item.id, csrf_token: csrf });
+                                const result = await fetch('/Foto/public/experiencias.php', { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+                                const updated = await result.json(); if (!result.ok) throw new Error(updated.error || 'No se pudo borrar la foto.');
+                                card.remove(); if (!community.querySelector('.community-card')) loadExperiences();
+                            } catch (error) { alert(error.message); remove.disabled = false; }
+                        });
+                        actions.append(remove);
+                    }
+                    card.append(image, title, story, actions); community.append(card);
+                });
             } catch {
-                community.replaceChildren();
-                const error = document.createElement('p');
-                error.className = 'empty';
-                error.textContent = 'Por el momento no se pudieron cargar las experiencias.';
-                community.append(error);
+                community.replaceChildren(); const error = document.createElement('p'); error.className = 'empty'; error.textContent = 'Por el momento no se pudieron cargar los momentos felices.'; community.append(error);
             }
         };
-        renderExperiences();
+        loadExperiences();
     }
 
-    function leerCookie(nombre) {
-        const coincide = document.cookie.match(new RegExp('(?:^|; )' + nombre + '=([^;]*)'));
-        return coincide ? coincide[1] : null;
-    }
-
-    function guardarCookie(nombre, valor, dias) {
-        document.cookie = `${nombre}=${valor}; max-age=${dias * 86400}; path=/; SameSite=Lax`;
-    }
-
-    function nuevoId() {
-        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-            const r = Math.random() * 16 | 0;
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
-    }
-
-    function mostrarAviso() {
-        const aviso = document.createElement('div');
-        aviso.className = 'aviso-cookies';
-        aviso.innerHTML = `<p>Usamos cookies para medir cómo se usa este sitio (páginas, clics y tiempo). No registramos lo que escribes en los formularios.</p><button type="button" data-respuesta="si">Aceptar</button><button type="button" data-respuesta="no" class="secundario">Rechazar</button>`;
-        aviso.addEventListener('click', (evento) => {
-            const respuesta = evento.target.dataset.respuesta;
-            if (!respuesta) return;
-            guardarCookie('analitica', respuesta, 180);
-            aviso.remove();
-            if (respuesta === 'si') iniciar();
-        });
-        document.body.appendChild(aviso);
-    }
-
-    const enlacePrivacidad = document.getElementById('cambiar-privacidad');
-    if (enlacePrivacidad) {
-        enlacePrivacidad.addEventListener('click', (evento) => {
-            evento.preventDefault();
-            guardarCookie('analitica', '', 0);
-            location.reload();
-        });
-    }
-
-    const consentimiento = leerCookie('analitica');
-    if (consentimiento === 'si') iniciar();
-    else if (consentimiento === null) mostrarAviso();
-
-    function iniciar() {
-        let visitanteId = leerCookie('visitante_id');
-        if (!visitanteId) visitanteId = nuevoId();
-        guardarCookie('visitante_id', visitanteId, 365);
-        let sesionId = sessionStorage.getItem('sesion_id');
-        if (!sesionId) {
-            sesionId = nuevoId();
-            sessionStorage.setItem('sesion_id', sesionId);
+    const consent = document.cookie.match(/(?:^|; )analitica=([^;]*)/);
+    if (consent && decodeURIComponent(consent[1]) === 'si') {
+        let visitor = document.cookie.match(/(?:^|; )visitante_id=([^;]*)/);
+        if (!visitor) {
+            visitor = [null, window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`];
+            document.cookie = `visitante_id=${encodeURIComponent(visitor[1])}; max-age=31536000; path=/; SameSite=Lax`;
         }
-        function enviar(tipo, extra = {}) {
-            const evento = { tipo, visitante_id: visitanteId, sesion_id: sesionId, pagina: location.pathname, ...extra };
-            navigator.sendBeacon(API, JSON.stringify(evento));
-        }
-        enviar('vista');
-        document.addEventListener('click', (evento) => {
-            const el = evento.target.closest('a, button, [data-track]');
-            if (!el || el.closest('.aviso-cookies')) return;
-            const nombre = el.dataset.track || el.textContent.trim().slice(0, 60) || el.tagName;
-            enviar('clic', { elemento: nombre });
+        const session = sessionStorage.getItem('sesion_id') || (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`);
+        sessionStorage.setItem('sesion_id', session);
+        const send = (tipo, extra = {}) => navigator.sendBeacon('/Seguir/api/eventos.php', JSON.stringify({ tipo, visitante_id: decodeURIComponent(visitor[1]), sesion_id: session, pagina: location.pathname, ...extra }));
+        send('vista');
+        document.addEventListener('click', (event) => {
+            const element = event.target.closest('a, button, [data-track]'); if (!element || element.closest('.aviso-cookies')) return;
+            send('clic', { elemento: (element.dataset.track || element.textContent.trim()).slice(0, 60) || element.tagName });
         });
-        let inicio = Date.now();
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                const segundos = Math.round((Date.now() - inicio) / 1000);
-                if (segundos > 0) enviar('tiempo', { segundos });
-            } else inicio = Date.now();
-        });
+    } else if (!consent) {
+        const notice = document.createElement('aside'); notice.className = 'aviso-cookies';
+        notice.style.cssText = 'position:fixed;z-index:1000;left:16px;right:16px;bottom:16px;max-width:620px;margin:auto;padding:16px;background:#fff;border:1px solid #e9e3d9;border-radius:16px;box-shadow:0 10px 32px #0002;color:#28352e';
+        const text = document.createElement('p'); text.textContent = 'Usamos cookies opcionales para medir visitas y clics. No registramos lo que escribes en formularios.';
+        const buttons = document.createElement('div'); buttons.style.cssText = 'display:flex;gap:10px;justify-content:flex-end';
+        [['si', 'Aceptar'], ['no', 'Rechazar']].forEach(([value, label]) => { const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.respuesta = value; button.style.cssText = 'padding:9px 14px;border:0;border-radius:9px;background:#365b45;color:white;font-weight:700'; button.addEventListener('click', () => { document.cookie = `analitica=${value}; max-age=15552000; path=/; SameSite=Lax`; notice.remove(); location.reload(); }); buttons.append(button); });
+        notice.append(text, buttons); document.body.append(notice);
     }
 })();
