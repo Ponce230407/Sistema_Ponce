@@ -1,4 +1,17 @@
 <?php
+// Use cookies consistently on localhost and behind HTTPS reverse proxies (Render).
+if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
 $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
@@ -24,5 +37,5 @@ if (session_status() === PHP_SESSION_NONE) {
 
 function e($texto)
 {
-    return htmlspecialchars($texto, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }

@@ -4,7 +4,8 @@ require_once __DIR__ . '/conexion.php';
 function require_login(): void
 {
     if (empty($_SESSION['usuario_id']) && ($_SESSION['rol'] ?? '') !== 'admin') {
-        header('Location: ../LOGIN/login.php');
+        $returnTo = $_SERVER['REQUEST_URI'] ?? '/Seguir/bienvenida.php';
+        header('Location: /LOGIN/login.php?return=' . rawurlencode($returnTo));
         exit;
     }
 }
