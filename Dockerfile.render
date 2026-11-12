@@ -1,13 +1,9 @@
 FROM php:8.2-apache
 
-# Instalar y habilitar las extensiones para MySQL (incluyendo PDO y mysqli)
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+# PDO, MySQLi and multibyte string support used by the app.
+RUN docker-php-ext-install pdo pdo_mysql mysqli mbstring
 
-# Copiar los archivos del proyecto al directorio web de Apache
 COPY . /var/www/html/
-
-# Configurar permisos para Apache
 RUN chown -R www-data:www-data /var/www/html
 
-# Exponer el puerto estándar 80 del contenedor web
 EXPOSE 80
