@@ -1,28 +1,16 @@
 <?php
-include 'conexion.php';
-$id = $_GET['id'] ?? null;
-$producto = null;
-if ($id) {
-    $stmt = $conexion->prepare("SELECT * FROM productos WHERE id_producto = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $producto = $stmt->get_result()->fetch_assoc();
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nombre = trim($_POST['nombre'] ?? '');
-    $descripcion = trim($_POST['descripcion'] ?? '');
-    $precio = (float) ($_POST['precio'] ?? 0);
-    $stock = (int) ($_POST['stock'] ?? 0);
-    if ($id) {
-        $stmt = $conexion->prepare("UPDATE productos SET nombre=?, descripcion=?, precio=?, stock=? WHERE id_producto=?");
-        $stmt->bind_param("ssdii", $nombre, $descripcion, $precio, $stock, $id);
-    } else {
-        $stmt = $conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, stock) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssdi", $nombre, $descripcion, $precio, $stock);
-    }
-    $stmt->execute();
-    header("Location: productos.php");
-    exit();
+require_once __DIR__ . '/../Seguir/auth.php';
+require_once __DIR__ . '/../LOGIN/conexion.php';
+require_admin($pdo);
+require_once __DIR__ . '/conexion.php';
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: null;
+$product = null;
+if ($id) { $stmt = $conexion->prepare('SELECT id_producto, nombre, descripcion FROM productos WHERE id_producto=? AND activo=1'); $stmt->bind_param('i',$id); $stmt->execute(); $product=$stmt->get_result()->fetch_assoc(); if(!$product){http_response_code(404);exit('Producto no encontrado.');} }
+$error='';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    verify_csrf(); $name=trim((string)($_POST['nombre']??'')); $description=trim((string)($_POST['descripcion']??''));
+    if($name==='' || mb_strlen($name)>150 || mb_strlen($description)>2000){$error='Escribe un nombre válido (máximo 150 caracteres) y una descripción de hasta 2000 caracteres.';}
+    else { if($id){$stmt=$conexion->prepare('UPDATE productos SET nombre=?, descripcion=? WHERE id_producto=?');$stmt->bind_param('ssi',$name,$description,$id);}else{$stmt=$conexion->prepare('INSERT INTO productos (nombre, descripcion, precio, stock) VALUES (?, ?, 0, 0)');$stmt->bind_param('ss',$name,$description);} $stmt->execute();header('Location: productos.php',true,303);exit; }
 }
 ?>
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><?= $producto ? 'Editar' : 'Registrar' ?> insumo | Patitas con Hogar</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{background:#fff8ef!important;color:#28352e}.card{border:0;border-radius:16px;overflow:hidden}.card-header{background:#365b45!important}</style></head><body class="p-4"><?php include 'menu.php'; ?><main class="container col-md-7"><div class="card shadow-sm"><div class="card-header text-white"><h1 class="h4 mb-0"><?= $producto ? 'Editar insumo' : 'Registrar un insumo' ?></h1></div><div class="card-body"><form method="POST"><div class="mb-3"><label class="form-label" for="nombre">Nombre del insumo</label><input id="nombre" type="text" name="nombre" class="form-control" maxlength="150" value="<?= htmlspecialchars($producto['nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required></div><div class="mb-3"><label class="form-label" for="descripcion">Descripción</label><textarea id="descripcion" name="descripcion" class="form-control" rows="3"><?= htmlspecialchars($producto['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea></div><div class="row"><div class="col-md-6 mb-3"><label class="form-label" for="precio">Costo unitario ($)</label><input id="precio" type="number" step="0.01" min="0" name="precio" class="form-control" value="<?= htmlspecialchars((string) ($producto['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required></div><div class="col-md-6 mb-3"><label class="form-label" for="stock">Cantidad disponible</label><input id="stock" type="number" min="0" name="stock" class="form-control" value="<?= htmlspecialchars((string) ($producto['stock'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required></div></div><a href="productos.php" class="btn btn-outline-secondary">Cancelar</a> <button type="submit" class="btn btn-success">Guardar insumo</button></form></div></div></main><script src="/Seguir/tracker.js"></script></body></html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=$id?'Editar':'Agregar'?> producto</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{background:#fff8ef;color:#28352e}.btn-green{background:#365b45;color:white}</style></head><body class="p-3 p-md-4"><?php require __DIR__.'/menu.php'; ?><main class="container" style="max-width:720px"><h1 class="h2"><?=$id?'Editar':'Agregar'?> producto</h1><p class="text-secondary">Solo el administrador puede modificar el catálogo visible para donantes.</p><?php if($error): ?><p class="alert alert-danger"><?=e($error)?></p><?php endif; ?><form method="post" class="bg-white border rounded-4 p-4"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><label class="form-label">Nombre<input class="form-control" name="nombre" maxlength="150" required value="<?=e($_POST['nombre']??$product['nombre']??'')?>"></label><label class="form-label mt-3">Descripción<textarea class="form-control" name="descripcion" rows="4" maxlength="2000"><?=e($_POST['descripcion']??$product['descripcion']??'')?></textarea></label><div class="mt-4 d-flex gap-2"><button class="btn btn-green">Guardar</button><a class="btn btn-outline-secondary" href="productos.php">Cancelar</a></div></form></main><script src="/Seguir/tracker.js" defer></script></body></html>

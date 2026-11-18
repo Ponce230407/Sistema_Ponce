@@ -2,70 +2,14 @@
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../LOGIN/conexion.php';
 require_login();
-
-$pdo->exec("CREATE TABLE IF NOT EXISTS experiencias_perritos (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NULL,
-    nombre VARCHAR(80) NOT NULL,
-    historia VARCHAR(1000) NOT NULL,
-    foto VARCHAR(255) NOT NULL,
-    foto_datos MEDIUMBLOB NULL,
-    foto_mime VARCHAR(32) NULL,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_experiencias_creado (creado_en),
-    INDEX idx_experiencias_usuario (usuario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-foreach (['usuario_id' => 'INT NULL AFTER id', 'foto_datos' => 'MEDIUMBLOB NULL', 'foto_mime' => 'VARCHAR(32) NULL'] as $column => $definition) {
-    $check = $pdo->prepare('SHOW COLUMNS FROM experiencias_perritos LIKE ?');
-    $check->execute([$column]);
-    if (!$check->fetch()) $pdo->exec("ALTER TABLE experiencias_perritos ADD COLUMN {$column} {$definition}");
+$pdo->exec("CREATE TABLE IF NOT EXISTS experiencias_perritos (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, usuario_id INT NULL, nombre VARCHAR(80) NOT NULL, historia VARCHAR(1000) NOT NULL, foto VARCHAR(255) NOT NULL, foto_datos MEDIUMBLOB NULL, foto_mime VARCHAR(32) NULL, creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, INDEX idx_experiencias_creado (creado_en), INDEX idx_experiencias_usuario (usuario_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+foreach (['usuario_id' => 'INT NULL AFTER id', 'foto_datos' => 'MEDIUMBLOB NULL', 'foto_mime' => 'VARCHAR(32) NULL'] as $column => $definition) { $check=$pdo->prepare('SHOW COLUMNS FROM experiencias_perritos LIKE ?');$check->execute([$column]);if(!$check->fetch())$pdo->exec("ALTER TABLE experiencias_perritos ADD COLUMN {$column} {$definition}"); }
+$error='';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    verify_csrf();$name=trim((string)($_POST['nombre']??''));$story=trim((string)($_POST['historia']??''));$photo=$_FILES['foto']??null;
+    if($name===''||mb_strlen($name)>80||$story===''||mb_strlen($story)>1000)$error='Escribe el nombre de tu mascota y cuéntanos un momento feliz (máximo 1000 caracteres).';
+    elseif(!$photo||($photo['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_OK||($photo['size']??0)>5*1024*1024)$error='Selecciona o toma una foto JPG, PNG o WebP de máximo 5 MB.';
+    else{$image=@getimagesize($photo['tmp_name']);$mime=$image['mime']??'';if(!in_array($mime,['image/jpeg','image/png','image/webp'],true))$error='El archivo debe ser una imagen JPG, PNG o WebP válida.';else{$bytes=file_get_contents($photo['tmp_name']);if($bytes===false)$error='No se pudo leer la foto. Inténtalo de nuevo.';else{try{$stmt=$pdo->prepare("INSERT INTO experiencias_perritos (usuario_id,nombre,historia,foto,foto_datos,foto_mime) VALUES (?,?,?,'',?,?)");$stmt->bindValue(1,(int)$_SESSION['usuario_id'],PDO::PARAM_INT);$stmt->bindValue(2,$name);$stmt->bindValue(3,$story);$stmt->bindValue(4,$bytes,PDO::PARAM_LOB);$stmt->bindValue(5,$mime);$stmt->execute();$id=(int)$pdo->lastInsertId();$pdo->prepare('UPDATE experiencias_perritos SET foto=? WHERE id=?')->execute(['/Foto/public/experiencias.php?imagen='.$id,$id]);header('Location: /Seguir/publicar-perro.php?publicada=1',true,303);exit;}catch(Throwable $exception){error_log('No se pudo guardar la experiencia: '.$exception->getMessage());$error='No se pudo guardar tu publicación. Inténtalo de nuevo más tarde.';}}}}
 }
-
-$message = '';
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verify_csrf();
-    $nombre = trim((string) ($_POST['nombre'] ?? ''));
-    $historia = trim((string) ($_POST['historia'] ?? ''));
-    $foto = $_FILES['foto'] ?? null;
-    if ($nombre === '' || mb_strlen($nombre) > 80 || $historia === '' || mb_strlen($historia) > 1000) {
-        $error = 'Escribe el nombre de tu mascota y cuéntanos un momento feliz (máximo 1000 caracteres).';
-    } elseif (!$foto || !isset($foto['error']) || $foto['error'] !== UPLOAD_ERR_OK || $foto['size'] > 5 * 1024 * 1024) {
-        $error = 'Selecciona una foto JPG, PNG o WebP de máximo 5 MB.';
-    } else {
-        $imageInfo = @getimagesize($foto['tmp_name']);
-        $mime = $imageInfo['mime'] ?? '';
-        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-            $error = 'El archivo debe ser una imagen JPG, PNG o WebP válida.';
-        } else {
-            $imageBytes = file_get_contents($foto['tmp_name']);
-            if ($imageBytes === false) {
-                $error = 'No se pudo leer la foto. Inténtalo de nuevo.';
-            } else {
-                try {
-                    $statement = $pdo->prepare("INSERT INTO experiencias_perritos (usuario_id, nombre, historia, foto, foto_datos, foto_mime) VALUES (?, ?, ?, '', ?, ?)");
-                    $statement->bindValue(1, (int) $_SESSION['usuario_id'], PDO::PARAM_INT);
-                    $statement->bindValue(2, $nombre, PDO::PARAM_STR);
-                    $statement->bindValue(3, $historia, PDO::PARAM_STR);
-                    $statement->bindValue(4, $imageBytes, PDO::PARAM_LOB);
-                    $statement->bindValue(5, $mime, PDO::PARAM_STR);
-                    $statement->execute();
-                    $id = (int) $pdo->lastInsertId();
-                    $pdo->prepare('UPDATE experiencias_perritos SET foto = ? WHERE id = ?')->execute(['/Foto/public/experiencias.php?imagen=' . $id, $id]);
-                    header('Location: /Seguir/publicar-perro.php?publicada=1', true, 303);
-                    exit;
-                } catch (Throwable $dbError) {
-                    error_log('No se pudo guardar la experiencia: ' . $dbError->getMessage());
-                    $error = 'No se pudo guardar tu publicación. Inténtalo de nuevo más tarde.';
-                }
-            }
-        }
-    }
-}
-if (isset($_GET['publicada'])) $message = '¡Listo! Tu momento feliz ya está compartido con la comunidad.';
 ?>
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Comparte fotos y momentos felices con tu mascota."><title>Comparte un momento feliz | Patitas con Hogar</title>
-<style>
-:root{--green:#365b45;--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--line:#e9e3d9}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}.experience-wrap{width:min(760px,100%);margin:0 auto;padding:24px 18px 56px}.experience-card{padding:clamp(20px,5vw,36px);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 36px rgba(40,53,46,.08)}h1{margin:.2em 0;color:var(--green);font-size:clamp(2rem,7vw,3rem);line-height:1.1}.experience-card p{color:var(--muted)}.experience-form{display:grid;gap:16px;margin-top:24px}.experience-form label{display:grid;gap:7px;font-weight:700}.experience-form input,.experience-form textarea{width:100%;padding:12px 14px;border:1px solid #d6d0c7;border-radius:12px;font:inherit}.experience-form textarea{min-height:110px;resize:vertical}.experience-form button{justify-self:start;padding:13px 20px;border:0;border-radius:12px;background:var(--green);color:white;font:inherit;font-weight:800;cursor:pointer}.notice,.error{padding:12px 14px;border-radius:12px}.notice{background:#edf9ee;color:#23543a}.error{background:#fff1f1;color:#7d2d2a}.back{color:var(--green);font-weight:700}
-</style></head><body><?php require __DIR__ . '/menu.php'; ?><main class="experience-wrap"><section class="experience-card"><p><a class="back" href="/Foto/public/index.html#comunidad">← Volver a la comunidad</a></p><h1>Comparte un momento feliz 🐾</h1><p>Sube una foto y cuéntanos un recuerdo bonito con tu mascota. La comunidad podrá verlo y dejarle un corazón. Esta sección es para celebrar a nuestras mascotas, no para publicar animales en adopción.</p><?php if ($message): ?><p class="notice" role="status"><?= e($message) ?></p><?php endif; ?><?php if ($error): ?><p class="error" role="alert"><?= e($error) ?></p><?php endif; ?><form class="experience-form" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>"><label>Nombre de tu mascota<input name="nombre" maxlength="80" required></label><label>Cuéntanos el momento feliz<textarea name="historia" maxlength="1000" required></textarea></label><label>Foto (JPG, PNG o WebP, máximo 5 MB)<input type="file" name="foto" accept="image/jpeg,image/png,image/webp" required></label><button type="submit">Compartir mi momento</button></form></section></main></body></html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Comparte un momento feliz | Patitas con Hogar</title><style>:root{--green:#365b45;--ink:#28352e;--muted:#66736a;--cream:#fff8ef;--line:#e9e3d9}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 system-ui,sans-serif}.wrap{width:min(760px,calc(100% - 32px));margin:28px auto}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:clamp(20px,4vw,36px);box-shadow:0 12px 32px #26382c12}.back{color:var(--green);font-weight:700}h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.15}.field{display:block;margin:18px 0;font-weight:700}.field input,.field textarea{display:block;width:100%;margin-top:7px;padding:12px;border:1px solid #c9d2ca;border-radius:10px;font:inherit}.field textarea{min-height:130px;resize:vertical}.actions{display:flex;gap:12px;flex-wrap:wrap}.button{border:0;border-radius:999px;background:var(--green);color:white;padding:12px 20px;font:700 1rem system-ui;cursor:pointer}.button.secondary{background:#ef9c55;color:#30251a}.preview{display:none;max-width:100%;max-height:300px;border-radius:12px;margin:14px 0}.notice{padding:12px 16px;border-radius:10px;background:#e6f4e8}.error{background:#fff0ed;color:#922d21;padding:12px;border-radius:10px}@media(max-width:560px){.wrap{margin:16px auto}}</style></head><body><?php require __DIR__.'/menu.php'; ?><main class="wrap"><section class="card"><a class="back" href="/Foto/public/index.html#comunidad">← Volver a la comunidad</a><h1>Comparte un momento feliz 🐾</h1><p>Cuéntanos una historia bonita y agrega una foto de tu mascota. Puedes elegir una imagen o abrir la cámara de tu dispositivo.</p><?php if(isset($_GET['publicada'])): ?><p class="notice">¡Listo! Tu momento feliz ya está compartido con la comunidad.</p><?php endif; ?><?php if($error): ?><p class="error"><?=e($error)?></p><?php endif; ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><label class="field">Nombre de tu mascota<input name="nombre" maxlength="80" required value="<?=e($_POST['nombre']??'')?>"></label><label class="field">Tu historia<textarea name="historia" maxlength="1000" required><?=e($_POST['historia']??'')?></textarea></label><label class="field">Foto de tu mascota<input id="photo" type="file" name="foto" accept="image/jpeg,image/png,image/webp" required><small>Puedes usar los botones para elegir una foto o activar la cámara trasera en móviles.</small></label><img id="preview" class="preview" alt="Vista previa de la foto seleccionada"><div class="actions"><button class="button secondary" type="button" id="camera">📷 Activar cámara</button><button class="button" type="submit">Compartir momento</button></div></form></section></main><script>const input=document.getElementById('photo'),camera=document.getElementById('camera'),preview=document.getElementById('preview');camera.addEventListener('click',()=>{input.setAttribute('capture','environment');input.click()});input.addEventListener('change',()=>{if(input.files&&input.files[0]){preview.src=URL.createObjectURL(input.files[0]);preview.style.display='block'}});</script><script src="/Seguir/tracker.js" defer></script></body></html>
