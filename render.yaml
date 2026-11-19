@@ -29,3 +29,13 @@ services:
         sync: false
       - key: REFUGIO_DIRECCION
         sync: false
+      - key: CHAT_API_URL
+        sync: false
+  - type: web
+    name: patitas-chat-api
+    runtime: python
+    plan: free
+    rootDir: chat_api
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4
+    healthCheckPath: /health
