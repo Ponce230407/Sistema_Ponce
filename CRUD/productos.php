@@ -34,13 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'ofrec
             $insert->execute([$productId, $userId > 0 ? $userId : null, $name, $contact, $quantity]);
             $saved++;
         }
-if ($saved) {
-    if (!empty($_SESSION['usuario_id'])) {
-        header('Location: /Seguir/dashboard.php?donacion=ok');
-        exit;
+if ($saved) $notice = '¡Gracias! El refugio recibió tu oferta de donación y se pondrá en contacto contigo.';
+        else $error = 'Los insumos seleccionados ya no están disponibles. Actualiza la página e inténtalo de nuevo.';
     }
-    $notice = '¡Gracias! El refugio recibió tu oferta de donación y se pondrá en contacto contigo.';
-}
 }
 $products = $pdo->query('SELECT id_producto, nombre, descripcion FROM productos WHERE activo = 1 ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC);
 $csrf = csrf_token();
