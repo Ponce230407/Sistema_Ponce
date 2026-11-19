@@ -1,5 +1,20 @@
 <?php
+feature/home-dropdown-admin-dashboard
 require_once __DIR__ . '/session.php';
+=======
+// Use cookies consistently on localhost and behind HTTPS reverse proxies (Render).
+if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+ main
 $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
@@ -16,10 +31,34 @@ try {
 } catch (PDOException $error) {
     error_log('No se pudo conectar con la base de datos: ' . $error->getMessage());
     http_response_code(500);
+feature/home-dropdown-admin-dashboard
     exit('No se pudo conectar a la base de datos. Verifica la configuración DB_* del hosting.');
 }
 
 function e($texto): string
+=======
+    exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_* .');
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Volver a abrir la pantalla de inicio de sesión no debe cerrar ni reemplazar una sesión activa.
+$requestPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+if ($requestPath === '/LOGIN/login.php' && isset($_SESSION['usuario_id'])) {
+    if (($_SESSION['rol'] ?? '') === 'admin' || (int) $_SESSION['usuario_id'] === 0) {
+        header('Location: /Seguir/admin.php', true, 303);
+        exit;
+    }
+    if ((int) $_SESSION['usuario_id'] > 0) {
+        header('Location: /Seguir/bienvenida.php', true, 303);
+        exit;
+    }
+}
+
+function e($texto)
+ main
 {
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }

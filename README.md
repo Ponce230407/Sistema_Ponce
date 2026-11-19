@@ -1,21 +1,31 @@
 # Patitas con Hogar 🐾
 
-Sitio web de una fundación dedicada al rescate, cuidado y adopción responsable de perros. La plataforma incluye información de la fundación, formulario de opinión, contacto, acceso de colaboradores y gestión de insumos.
+Aplicación web para compartir información sobre adopciones, contacto y actividades de la comunidad.
 
-## Secciones
+## Funcionalidades
 
-- **Inicio:** misión, proceso de ayuda e información ilustrativa sobre adopción.
-- **Cuéntanos tu experiencia:** formulario con validación y almacenamiento MySQL.
-- **Contacto y ubicación:** orientación para adoptar, colaborar y coordinar visitas.
-- **Insumos del refugio:** administración de artículos y existencias del refugio.
-- **Colaboradores:** registro e inicio de sesión para acceder a las herramientas privadas.
+- Inicio público con las publicaciones de perros compartidas por usuarios.
+- Publicación de perros con foto desde una cuenta registrada; cada usuario puede eliminar sus propias publicaciones.
+- Consultas por WhatsApp sin necesidad de iniciar sesión.
+- Contacto y ubicación configurables mediante variables de entorno.
+- Registro, acceso de colaboradores, métricas e inventario.
+- Chat temporal compartido entre visitantes mediante un servicio REST Flask en memoria, sin base de datos.
 
-## Requisitos
+## Configuración
 
-- PHP con extensiones MySQLi y PDO.
-- MySQL o MariaDB.
-- Configurar las credenciales de base de datos según los archivos de conexión existentes.
+Se requiere PHP 8.2 con PDO MySQL y una base MySQL/MariaDB con las credenciales DB_* configuradas. En Render, configura también:
 
-## Importante
+- `WHATSAPP_NUMBER`: número internacional de WhatsApp, solo dígitos y con código de país (opcional).
+- `CONTACT_EMAIL`: correo público de contacto (opcional).
+- `REFUGIO_DIRECCION`: dirección verificada para mostrar el mapa (opcional).
+- `CHAT_API_URL`: URL pública del servicio Flask de chat; véase [`chat_api/README.md`](chat_api/README.md).
 
-Los perfiles de perros de la página de inicio son ilustrativos y no representan animales disponibles confirmados. Actualiza la información con datos verificados de la fundación antes de publicar. La dirección y los horarios de visita deben confirmarse con el equipo.
+El número y la dirección no se inventan: si no se configuran, la página explica que los datos aún no están disponibles. Los enlaces de consulta son públicos.
+
+## Fotos y almacenamiento
+
+Las fotos aceptadas son JPG, PNG y WebP, con un máximo de 5 MB. Se validan como imágenes y se guardan en la base de datos. Para compartir una foto desde la cámara, pulsa “Activar cámara” y concede el permiso que solicita el navegador; requiere HTTPS o localhost. Si no hay cámara disponible o el navegador bloquea el permiso, se puede seleccionar una imagen desde el dispositivo.
+
+## Chat sin base de datos
+
+El servicio REST de `chat_api/` conserva hasta 500 mensajes en memoria durante un máximo de 24 horas. Al reiniciar o escalar el servicio, se pierde el historial. Para ejecutar y comprobar la conversación entre dos navegadores, sigue las instrucciones de [`chat_api/README.md`](chat_api/README.md).
