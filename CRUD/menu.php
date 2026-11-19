@@ -1,9 +1,4 @@
-<?php
-feature/home-dropdown-admin-dashboard
-// Use exactly the same full navigation as the public pages.
-require __DIR__ . '/../Foto/public/nav.html';
-?>
-=======
+
 require_once __DIR__ . '/../Seguir/auth.php';
 $isLoggedIn = !empty($_SESSION['usuario_id']) || (($_SESSION['rol'] ?? '') === 'admin');
 $isAdministrator = isset($pdo) && function_exists('is_admin') && is_admin($pdo);
