@@ -1,4 +1,7 @@
 <?php
+feature/home-dropdown-admin-dashboard
+require_once __DIR__ . '/session.php';
+=======
 // Use cookies consistently on localhost and behind HTTPS reverse proxies (Render).
 if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -11,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
         'samesite' => 'Lax',
     ]);
 }
-
+ main
 $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
@@ -23,11 +26,17 @@ try {
         "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",
         $user,
         $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
     );
 } catch (PDOException $error) {
     error_log('No se pudo conectar con la base de datos: ' . $error->getMessage());
     http_response_code(500);
+feature/home-dropdown-admin-dashboard
+    exit('No se pudo conectar a la base de datos. Verifica la configuración DB_* del hosting.');
+}
+
+function e($texto): string
+=======
     exit('No se pudo conectar a la base de datos. Verifica que MySQL esté activo y revisa la configuración DB_* .');
 }
 
@@ -49,6 +58,7 @@ if ($requestPath === '/LOGIN/login.php' && isset($_SESSION['usuario_id'])) {
 }
 
 function e($texto)
+ main
 {
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }

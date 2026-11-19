@@ -1,6 +1,10 @@
+ feature/home-dropdown-admin-dashboard
+-- Esquema común del sistema. Ejecutar dentro de la base configurada en DB_NAME.
+=======
 -- Esquema común para LOGIN, seguimiento, productos, encuesta y publicaciones de perros.
 USE railway;
 
+ main
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -23,7 +27,12 @@ CREATE TABLE IF NOT EXISTS eventos (
     segundos SMALLINT UNSIGNED NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+feature/home-dropdown-admin-dashboard
+    INDEX idx_eventos_visitante (visitante_id),
+    INDEX idx_eventos_sesion (sesion_id)
+=======
     INDEX (visitante_id), INDEX (sesion_id)
+main
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS productos (
@@ -46,6 +55,20 @@ CREATE TABLE IF NOT EXISTS respuestas_encuesta (
     fecha_respuesta TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+feature/home-dropdown-admin-dashboard
+-- Necesaria para las inscripciones de Seguir/cursos.php, dashboard.php y admin.php.
+CREATE TABLE IF NOT EXISTS apoyos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    actividad VARCHAR(100) NOT NULL,
+    fecha DATE NOT NULL,
+    estado ENUM('activo', 'cancelado') NOT NULL DEFAULT 'activo',
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_apoyos_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    INDEX idx_apoyos_fecha_estado (fecha, estado),
+    INDEX idx_apoyos_usuario_fecha (usuario_id, fecha)
+=======
 CREATE TABLE IF NOT EXISTS perros_publicados (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -58,4 +81,5 @@ CREATE TABLE IF NOT EXISTS perros_publicados (
     INDEX idx_perros_creado (creado_en),
     INDEX idx_perros_usuario (usuario_id),
     CONSTRAINT fk_perros_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+main
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
