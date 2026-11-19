@@ -16,6 +16,19 @@
   let loading = false;
   const senderId = localStorage.getItem('patitas-chat-sender') || crypto.randomUUID();
   localStorage.setItem('patitas-chat-sender', senderId);
+
+  // Nombre del usuario: se pide una sola vez, al enviar el primer mensaje,
+  // y se guarda en este navegador.
+  function getName() {
+    let name = localStorage.getItem('patitas-chat-name');
+    if (!name) {
+      name = (prompt('¿Cómo te llamas? Este nombre lo verán las demás personas.') || '').trim().slice(0, 30);
+      if (!name) name = 'Visitante';
+      localStorage.setItem('patitas-chat-name', name);
+    }
+    return name;
+  }
+
   function draw(messages) {
     if (!messages.length && !box.children.length) {
       const p = document.createElement('p');
@@ -31,7 +44,8 @@
       bubble.className = 'bubble' + (item.sender_id === senderId ? ' mine' : '');
       bubble.textContent = item.text;
       const time = document.createElement('small');
-      time.textContent = `${item.sender_id === senderId ? 'Tú' : 'Visitante'} · ${new Date(item.created_at).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})}`;
+      const author = item.sender_id === senderId ? 'Tú' : (item.name || 'Visitante');
+      time.textContent = `${author} · ${new Date(item.created_at).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})}`;
       bubble.append(time);
       box.append(bubble);
       lastId = item.id;
@@ -57,11 +71,12 @@
     event.preventDefault();
     const text = field.value.trim();
     if (!text) return;
+    const name = getName();
     send.disabled = true;
     try {
       const response = await fetch(`${api}/messages`, {
         method:'POST', headers:{'Content-Type':'application/json', Accept:'application/json'},
-        body:JSON.stringify({text, sender_id:senderId})
+        body:JSON.stringify({text, sender_id:senderId, name})
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'No se pudo enviar el mensaje.');
